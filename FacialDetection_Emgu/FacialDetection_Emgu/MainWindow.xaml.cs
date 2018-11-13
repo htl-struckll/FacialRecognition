@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Globalization;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
@@ -14,6 +15,7 @@ using Microsoft.Rest;
 using Brushes = System.Windows.Media.Brushes;
 using MessageBox = System.Windows.MessageBox;
 using Pen = System.Windows.Media.Pen;
+using Point = System.Windows.Point;
 
 /*
  * Install-Package Microsoft.Azure.CognitiveServices.Vision.Face -Version 2.2.0-preview
@@ -131,7 +133,7 @@ namespace FacialDetection_Emgu
    
 
         /// <summary>
-        ///     Generates rendered picture with rectangles around the faces
+        /// Generates rendered picture with rectangles around the faces
         /// </summary>
         /// <param name="bitmapSource">Bitmap source of person</param>
         /// <returns>rendertarget of the picture with rectangels</returns>
@@ -149,6 +151,14 @@ namespace FacialDetection_Emgu
 
             foreach (DetectedFace face in _faceList)
             {
+                FormattedText formattedText = new FormattedText(
+                    "test",
+                    CultureInfo.GetCultureInfo("en-us"),
+                    FlowDirection.LeftToRight,
+                    new Typeface("Verdana"),
+                    32,
+                    Brushes.Black);
+
                 // Draw a rectangle on the face.
                 drawingContext.DrawRectangle(
                     Brushes.Transparent,
@@ -160,6 +170,13 @@ namespace FacialDetection_Emgu
                         face.FaceRectangle.Height * _resizeFactor
                     )
                 );
+
+                Point p = new Point(Convert.ToInt32(20),Convert.ToInt32(20));
+
+                drawingContext.DrawText(
+                   formattedText,
+                    p
+                    );
             }
 
             drawingContext.Close();
@@ -176,7 +193,6 @@ namespace FacialDetection_Emgu
             return faceWithRectBitmap;
         }
         #endregion
-
 
         #region output
 
