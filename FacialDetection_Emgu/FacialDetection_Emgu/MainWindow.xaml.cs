@@ -36,7 +36,6 @@ namespace FacialDetection_Emgu
         private const string ErrorFilePath = @"ProgrammFiles\error.log";
         #endregion
         private IList<DetectedFace> _faceList;
-        private string[] _faceDescriptions;
         private double _resizeFactor;
 
         private readonly VideoCapture _capture;
@@ -50,7 +49,7 @@ namespace FacialDetection_Emgu
         {
             InitializeComponent();
 
-            _capture = new VideoCapture(1);
+            _capture = new VideoCapture(0);
             _frame = new Mat();
 
             _capture.ImageGrabbed += ProcessFrame;
@@ -147,17 +146,16 @@ namespace FacialDetection_Emgu
 
             // Some images don't contain dpi info so we ´have to assume something (internet told so)
             _resizeFactor = dpi == 0 ? 1 : 96 / dpi;
-            _faceDescriptions = new string[_faceList.Count];
 
             foreach (DetectedFace face in _faceList)
             {
                 FormattedText formattedText = new FormattedText(
-                    "test",
+                    string.Join(", ", face.FaceAttributes.Gender.Value,face.FaceAttributes.Age),
                     CultureInfo.GetCultureInfo("en-us"),
                     FlowDirection.LeftToRight,
                     new Typeface("Verdana"),
                     32,
-                    Brushes.Black);
+                    Brushes.Red);
 
                 // Draw a rectangle on the face.
                 drawingContext.DrawRectangle(
@@ -171,8 +169,7 @@ namespace FacialDetection_Emgu
                     )
                 );
 
-                Point p = new Point(Convert.ToInt32(20),Convert.ToInt32(20));
-
+                Point p = new Point(face.FaceRectangle.Left, face.FaceRectangle.Top-32);
                 drawingContext.DrawText(
                    formattedText,
                     p
@@ -331,7 +328,7 @@ namespace FacialDetection_Emgu
                 BitmapEncoder enc = new BmpBitmapEncoder();
                 enc.Frames.Add(BitmapFrame.Create(image));
                 enc.Save(outStream);
-                System.Drawing.Bitmap bitmap = new System.Drawing.Bitmap(outStream);
+                Bitmap bitmap = new System.Drawing.Bitmap(outStream);
 
                 return new Bitmap(bitmap);
             }
