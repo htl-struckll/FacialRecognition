@@ -13,7 +13,6 @@ using Microsoft.Azure.CognitiveServices.Vision.Face;
 using Microsoft.Azure.CognitiveServices.Vision.Face.Models;
 using Microsoft.Rest;
 using Brushes = System.Windows.Media.Brushes;
-using MessageBox = System.Windows.MessageBox;
 using Pen = System.Windows.Media.Pen;
 using Point = System.Windows.Point;
 
@@ -26,23 +25,29 @@ using Point = System.Windows.Point;
 namespace FacialDetection_Emgu
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    ///     Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window
     {
         #region var
+
         #region const
+
         private const string SubscriptionKey = "eafef65edfe04fb5b70a3f9739cc1618";
         private const string ErrorFilePath = @"ProgrammFiles\error.log";
+
         #endregion
+
         private IList<DetectedFace> _faceList;
+        private string[] _faceDescriptions;
         private double _resizeFactor;
 
         private readonly VideoCapture _capture;
         private readonly Mat _frame;
         private const uint SkpFrames = 4; //to send the allowed amount of requests
-        private int _frameCnt = 0;
-        private bool _recording = false;
+        private int _frameCnt;
+        private bool _recording;
+
         #endregion
 
         public MainWindow()
@@ -55,19 +60,42 @@ namespace FacialDetection_Emgu
             _capture.ImageGrabbed += ProcessFrame;
         }
 
+        #region LocalSaves
+
+        /// <summary>
+        ///     Saves the error msg to file
+        /// </summary>
+        /// <param name="ex">Exception to save</param>
+        private void SaveErrorMsg(Exception ex)
+        {
+            using (StreamWriter writer = new StreamWriter(ErrorFilePath, true))
+            {
+                writer.WriteLine("[" + DateTime.Now + "] " + ex.Message + " | " + ex.StackTrace);
+            }
+        }
+
+        #endregion
+
         #region Heart
-        /// <summary>
-        /// Starts recording
-        /// </summary>
-        private void StartRecording() => _capture.Start();
 
         /// <summary>
-        /// Stops recording
+        ///     Starts recording
         /// </summary>
-        private void StopRecording() => _capture.Stop();
+        private void StartRecording()
+        {
+            _capture.Start();
+        }
 
         /// <summary>
-        /// Displays frame (should send it later to the analycer and display on the right
+        ///     Stops recording
+        /// </summary>
+        private void StopRecording()
+        {
+            _capture.Stop();
+        }
+
+        /// <summary>
+        /// Displays frame
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -87,33 +115,35 @@ namespace FacialDetection_Emgu
                     Bitmap renderTargetBitmap = RenderTargetBitmapToBitmap(withRectangle);
 
                     _frameCnt = 0;
-                    CamDisplayRaw.Dispatcher.Invoke(() => CamDisplayRaw.Source = BitmapToImageSource((renderTargetBitmap)));
+                    CamDisplayRaw.Dispatcher.Invoke(
+                        () => CamDisplayRaw.Source = BitmapToImageSource(renderTargetBitmap) );
                 }
             }
         }
 
         /// <summary>
-        ///  Uploads the image to the cloud and returns the detected faces with info
+        ///     Uploads the image to the cloud and returns the detected faces with info
         /// </summary>
         /// <param name="imageBitmap">Bitmap of the image</param>
         /// <returns>IList of detected faces</returns>
         private async Task<IList<DetectedFace>> UploadAndDetectFaces(Bitmap imageBitmap)
         {
             IFaceClient faceClient = new FaceClient(new ApiKeyServiceClientCredentials(SubscriptionKey));
-            faceClient.Endpoint = @"https://westeurope.api.cognitive.microsoft.com/face/v1.0/detect?returnFaceId=true&returnFaceLandmarks=true";
+            faceClient.Endpoint =
+                @"https://westeurope.api.cognitive.microsoft.com/face/v1.0/detect?returnFaceId=true&returnFaceLandmarks=true";
 
             IList<FaceAttributeType> faceAttributes =
                 new[]
                 {
                     FaceAttributeType.Gender, FaceAttributeType.Age,
-                    FaceAttributeType.Smile, FaceAttributeType.Emotion,
-                    FaceAttributeType.Glasses, FaceAttributeType.Hair
+                    FaceAttributeType.Emotion, FaceAttributeType.Glasses,
+                    FaceAttributeType.Hair
                 };
             try
             {
                 Stream stream = ImageToStream(Image.FromHbitmap(imageBitmap.GetHbitmap()), ImageFormat.Jpeg);
                 HttpOperationResponse<IList<DetectedFace>> faceList =
-                    await faceClient.Face.DetectWithStreamWithHttpMessagesAsync(stream, returnFaceId: true, returnFaceLandmarks: true, returnFaceAttributes: faceAttributes);
+                    await faceClient.Face.DetectWithStreamWithHttpMessagesAsync(stream, true, true, faceAttributes);
                 return faceList.Body;
             }
             catch (APIErrorException apiErrorException)
@@ -124,71 +154,75 @@ namespace FacialDetection_Emgu
             }
             catch (Exception e)
             {
-                //SaveErrorMsg(e);
                 ErrorOutput(e);
                 return new List<DetectedFace>();
             }
         }
-   
+
 
         /// <summary>
-        /// Generates rendered picture with rectangles around the faces
+        ///     Generates rendered picture with rectangles around the faces
         /// </summary>
         /// <param name="bitmapSource">Bitmap source of person</param>
         /// <returns>rendertarget of the picture with rectangels</returns>
         private RenderTargetBitmap GeneratePictureWithRectangles(BitmapSource bitmapSource)
         {
             DrawingVisual visual = new DrawingVisual();
-            DrawingContext drawingContext = visual.RenderOpen();
-            drawingContext.DrawImage(bitmapSource,
-                new Rect(0, 0, bitmapSource.Width, bitmapSource.Height));
-            double dpi = bitmapSource.DpiX;
-
-            // Some images don't contain dpi info so we ´have to assume something (internet told so)
-            _resizeFactor = dpi == 0 ? 1 : 96 / dpi;
-
-            foreach (DetectedFace face in _faceList)
+            using (DrawingContext drawingContext = visual.RenderOpen()
+            ) //todo running out of sytem memory after 2493 pictures
             {
-                FormattedText formattedText = new FormattedText(
-                    string.Join(", ", face.FaceAttributes.Gender.Value,face.FaceAttributes.Age),
-                    CultureInfo.GetCultureInfo("en-us"),
-                    FlowDirection.LeftToRight,
-                    new Typeface("Verdana"),
-                    32,
-                    Brushes.Red);
+                drawingContext.DrawImage(bitmapSource,
+                    new Rect(0, 0, bitmapSource.Width, bitmapSource.Height));
+                double dpi = bitmapSource.DpiX;
 
-                // Draw a rectangle on the face.
-                drawingContext.DrawRectangle(
-                    Brushes.Transparent,
-                    new Pen(Brushes.Red, 2),
-                    new Rect(
-                        face.FaceRectangle.Left * _resizeFactor,
-                        face.FaceRectangle.Top * _resizeFactor,
-                        face.FaceRectangle.Width * _resizeFactor,
-                        face.FaceRectangle.Height * _resizeFactor
-                    )
-                );
+                // Some images don't contain dpi info so we ´have to assume something (internet told so)
+                _resizeFactor = dpi == 0 ? 1 : 96 / dpi;
+                _faceDescriptions = new string[_faceList.Count];
 
-                Point p = new Point(face.FaceRectangle.Left, face.FaceRectangle.Top-32);
-                drawingContext.DrawText(
-                   formattedText,
-                    p
+                foreach (DetectedFace face in _faceList)
+                {
+                    FormattedText formattedText = new FormattedText(
+                        face.FaceAttributes.Emotion.Fear +  ", " + face.FaceAttributes.Gender,
+                        CultureInfo.GetCultureInfo("en-us"),
+                        FlowDirection.LeftToRight,
+                        new Typeface("Verdana"),
+                        20,
+                        Brushes.Red);
+
+                    // Draw a rectangle on the face.
+                    drawingContext.DrawRectangle(
+                        Brushes.Transparent,
+                        new Pen(Brushes.Red, 2),
+                        new Rect(
+                            face.FaceRectangle.Left * _resizeFactor,
+                            face.FaceRectangle.Top * _resizeFactor,
+                            face.FaceRectangle.Width * _resizeFactor,
+                            face.FaceRectangle.Height * _resizeFactor
+                        )
                     );
+
+                    Point p = new Point((face.FaceRectangle.Left - 10) * _resizeFactor,
+                        (face.FaceRectangle.Top - 30) * _resizeFactor);
+
+                    drawingContext.DrawText(formattedText, p);
+                }
+
+                drawingContext.Close();
             }
 
-            drawingContext.Close();
-
-            // Display the image with the rectangle around the face.
+            // Redner the image
             RenderTargetBitmap faceWithRectBitmap = new RenderTargetBitmap(
-                (int)(bitmapSource.PixelWidth * _resizeFactor),
-                (int)(bitmapSource.PixelHeight * _resizeFactor),
+                (int) (bitmapSource.PixelWidth * _resizeFactor),
+                (int) (bitmapSource.PixelHeight * _resizeFactor),
                 96,
                 96,
                 PixelFormats.Pbgra32);
 
             faceWithRectBitmap.Render(visual);
+
             return faceWithRectBitmap;
         }
+
         #endregion
 
         #region output
@@ -212,17 +246,19 @@ namespace FacialDetection_Emgu
         /// <param name="errMsg">Exception to display</param>
         private void ErrorOutput(Exception errMsg)
         {
-            Output(errMsg.Message, "Error", icn: MessageBoxImage.Error);
+            Output(errMsg.Message + "|" + errMsg.StackTrace, "Error", icn: MessageBoxImage.Error);
         }
 
         #endregion
 
         #region events
+
         private void StartStop_Click(object sender, RoutedEventArgs e)
         {
             StartStopBtn.Content = _recording ? "Start" : "Stop";
 
-            if (_recording) {
+            if (_recording)
+            {
                 _recording = false;
                 StopRecording();
             }
@@ -231,28 +267,33 @@ namespace FacialDetection_Emgu
                 _recording = true;
                 StartRecording();
             }
-
         }
-        private void Stop_Click(object sender, RoutedEventArgs e) => StopRecording();
+
+        private void Stop_Click(object sender, RoutedEventArgs e)
+        {
+            StopRecording();
+        }
+
         #endregion
 
         #region Converter
+
         /// <summary>
-        /// Convert image to stream
+        ///     Convert image to stream
         /// </summary>
         /// <param name="image"></param>
         /// <param name="format"></param>
         /// <returns></returns>
         private Stream ImageToStream(Image image, ImageFormat format)
         {
-            var stream = new System.IO.MemoryStream();
+            MemoryStream stream = new MemoryStream();
             image.Save(stream, format);
             stream.Position = 0;
             return stream;
         }
 
         /// <summary>
-        /// Converts a bitmap image to a image source
+        ///     Converts a bitmap image to a image source
         /// </summary>
         /// <param name="bitmap"></param>
         /// <returns></returns>
@@ -273,7 +314,7 @@ namespace FacialDetection_Emgu
         }
 
         /// <summary>
-        /// Convert bitmap to stream
+        ///     Convert bitmap to stream
         /// </summary>
         /// <param name="bitmap"></param>
         /// <returns></returns>
@@ -282,7 +323,7 @@ namespace FacialDetection_Emgu
             MemoryStream retVal;
             using (MemoryStream memory = new MemoryStream())
             {
-                bitmap.Save(memory, System.Drawing.Imaging.ImageFormat.Bmp);
+                bitmap.Save(memory, ImageFormat.Bmp);
                 memory.Position = 0;
                 BitmapImage bitmapimage = new BitmapImage();
                 bitmapimage.BeginInit();
@@ -292,19 +333,20 @@ namespace FacialDetection_Emgu
 
                 retVal = memory;
             }
+
             return retVal;
         }
 
         /// <summary>
-        /// Convert bitmap to bitmapsource
+        ///     Convert bitmap to bitmapsource
         /// </summary>
         /// <param name="bitmap"></param>
         /// <returns></returns>
         public BitmapSource BitmapToBitmapSource(Bitmap bitmap)
         {
             BitmapData bitmapData = bitmap.LockBits(
-                new System.Drawing.Rectangle(0, 0, bitmap.Width, bitmap.Height),
-                System.Drawing.Imaging.ImageLockMode.ReadOnly, bitmap.PixelFormat);
+                new Rectangle(0, 0, bitmap.Width, bitmap.Height),
+                ImageLockMode.ReadOnly, bitmap.PixelFormat);
 
             BitmapSource bitmapSource = BitmapSource.Create(
                 bitmapData.Width, bitmapData.Height,
@@ -317,7 +359,7 @@ namespace FacialDetection_Emgu
         }
 
         /// <summary>
-        /// Convert bitmapimage to bitmap
+        ///     Convert bitmapimage to bitmap
         /// </summary>
         /// <param name="image"></param>
         /// <returns></returns>
@@ -328,14 +370,14 @@ namespace FacialDetection_Emgu
                 BitmapEncoder enc = new BmpBitmapEncoder();
                 enc.Frames.Add(BitmapFrame.Create(image));
                 enc.Save(outStream);
-                Bitmap bitmap = new System.Drawing.Bitmap(outStream);
+                Bitmap bitmap = new Bitmap(outStream);
 
                 return new Bitmap(bitmap);
             }
         }
 
         /// <summary>
-        ///  Convert RenderTargetbitmap to bitmap
+        ///     Convert RenderTargetbitmap to bitmap
         /// </summary>
         /// <param name="renderTargetBitmap"></param>
         /// <returns></returns>
@@ -345,7 +387,7 @@ namespace FacialDetection_Emgu
             PngBitmapEncoder bitmapEncoder = new PngBitmapEncoder();
             bitmapEncoder.Frames.Add(BitmapFrame.Create(renderTargetBitmap));
 
-            using (var stream = new MemoryStream())
+            using (MemoryStream stream = new MemoryStream())
             {
                 bitmapEncoder.Save(stream);
                 stream.Seek(0, SeekOrigin.Begin);
@@ -357,19 +399,6 @@ namespace FacialDetection_Emgu
             }
 
             return BitmapImageToBitmap(bitmapImage);
-        }
-        #endregion
-
-        #region LocalSaves
-
-        /// <summary>
-        /// Saves the error msg to file
-        /// </summary>
-        /// <param name="ex">Exception to save</param>
-        private void SaveErrorMsg(Exception ex)
-        {
-            using (StreamWriter writer = new StreamWriter(ErrorFilePath, append: true))
-                writer.WriteLine("[" + DateTime.Now + "] " + ex.Message + " | " + ex.StackTrace);
         }
 
         #endregion
