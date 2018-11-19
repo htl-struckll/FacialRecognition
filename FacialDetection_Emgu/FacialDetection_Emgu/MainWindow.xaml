@@ -6,8 +6,12 @@
         mc:Ignorable="d"
         Title="Faceercognition" Height="450" Width="800">
     <Grid>
-        <Image x:Name="CamDisplayRaw" Margin="0,0,9.6,46"/>
+        <ToolBar Margin="0,0,-0.4,0" Height="31" VerticalAlignment="Top">
+            <Menu Margin="0,0,0,-0.4" Width="40">
+                <MenuItem x:Name="StartStopBtn" Background="AliceBlue" Click="StartStop_Click"  Header="Start" Height="25" Margin="0" Width="43"></MenuItem>
+            </Menu>
+        </ToolBar>
 
-        <Button x:Name="StartStopBtn" Click="StartStop_Click" Margin="0,0,9.6,10" Content="Start" HorizontalAlignment="Right" Width="91" Height="31" VerticalAlignment="Bottom"/>
+        <Image x:Name="CamDisplayRaw" Margin="0,36,9.6,10"/>
     </Grid>
 </Window>

@@ -14,6 +14,7 @@ using Microsoft.Azure.CognitiveServices.Vision.Face.Models;
 using Microsoft.Rest;
 using Brushes = System.Windows.Media.Brushes;
 using Pen = System.Windows.Media.Pen;
+using Person = FacialDetection_Emgu.Data.Person;
 using Point = System.Windows.Point;
 
 /*
@@ -39,7 +40,7 @@ namespace FacialDetection_Emgu
         #endregion
 
         private IList<DetectedFace> _faceList;
-        private string[] _faceDescriptions;
+        //private string[] _faceDescriptions;
         private double _resizeFactor;
 
         private readonly VideoCapture _capture;
@@ -144,6 +145,8 @@ namespace FacialDetection_Emgu
                 Stream stream = ImageToStream(Image.FromHbitmap(imageBitmap.GetHbitmap()), ImageFormat.Jpeg);
                 HttpOperationResponse<IList<DetectedFace>> faceList =
                     await faceClient.Face.DetectWithStreamWithHttpMessagesAsync(stream, true, true, faceAttributes);
+
+               
                 return faceList.Body;
             }
             catch (APIErrorException apiErrorException)
@@ -161,7 +164,7 @@ namespace FacialDetection_Emgu
 
 
         /// <summary>
-        ///     Generates rendered picture with rectangles around the faces
+        /// Generates rendered picture with rectangles around the faces
         /// </summary>
         /// <param name="bitmapSource">Bitmap source of person</param>
         /// <returns>rendertarget of the picture with rectangels</returns>
@@ -177,12 +180,13 @@ namespace FacialDetection_Emgu
 
                 // Some images don't contain dpi info so we ´have to assume something (internet told so)
                 _resizeFactor = dpi == 0 ? 1 : 96 / dpi;
-                _faceDescriptions = new string[_faceList.Count];
 
                 foreach (DetectedFace face in _faceList)
                 {
+                    Person tmpPerson = new Person(face);
+
                     FormattedText formattedText = new FormattedText(
-                        face.FaceAttributes.Emotion.Fear +  ", " + face.FaceAttributes.Gender,
+                        tmpPerson.ToString(),
                         CultureInfo.GetCultureInfo("en-us"),
                         FlowDirection.LeftToRight,
                         new Typeface("Verdana"),
@@ -252,10 +256,14 @@ namespace FacialDetection_Emgu
         #endregion
 
         #region events
-
+        /// <summary>
+        /// Starts/stops the recording
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void StartStop_Click(object sender, RoutedEventArgs e)
         {
-            StartStopBtn.Content = _recording ? "Start" : "Stop";
+            StartStopBtn.Header = _recording ? "Start" : "Stop";
 
             if (_recording)
             {
@@ -268,12 +276,6 @@ namespace FacialDetection_Emgu
                 StartRecording();
             }
         }
-
-        private void Stop_Click(object sender, RoutedEventArgs e)
-        {
-            StopRecording();
-        }
-
         #endregion
 
         #region Converter
