@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28010.2050
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FacialDetection_Emgu", "FacialDetection_Emgu\FacialDetection_Emgu.csproj", "{FE9F9D44-2C5F-4A6B-A36C-D92AE3556838}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FacialRecognition_Azure", "FacialRecognition_Azure\FacialRecognition_Azure.csproj", "{11C78A58-E3C6-49D7-866D-3A22F69AB8C0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,15 +11,15 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{FE9F9D44-2C5F-4A6B-A36C-D92AE3556838}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FE9F9D44-2C5F-4A6B-A36C-D92AE3556838}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FE9F9D44-2C5F-4A6B-A36C-D92AE3556838}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FE9F9D44-2C5F-4A6B-A36C-D92AE3556838}.Release|Any CPU.Build.0 = Release|Any CPU
+		{11C78A58-E3C6-49D7-866D-3A22F69AB8C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{11C78A58-E3C6-49D7-866D-3A22F69AB8C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{11C78A58-E3C6-49D7-866D-3A22F69AB8C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{11C78A58-E3C6-49D7-866D-3A22F69AB8C0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {A80D4096-E432-4ED4-B93E-6EC3873C8EE6}
+		SolutionGuid = {AD9C53DF-8A96-47E3-B4D9-001D8A8A936D}
 	EndGlobalSection
 EndGlobal

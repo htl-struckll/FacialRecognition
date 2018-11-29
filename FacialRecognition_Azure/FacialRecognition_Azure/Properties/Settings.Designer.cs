@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace FacialDetection_Emgu.Properties
+namespace FacialRecognition_Azure.Properties
 {
 
 

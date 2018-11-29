@@ -1,27 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using FacialDetection_Emgu.Data.Enumeration;
+using FacialRecognition_Azure.Data.Enumteration;
 using Microsoft.Azure.CognitiveServices.Vision.Face.Models;
 
-//todo implement missing attributes
-
-namespace FacialDetection_Emgu.Data
+namespace FacialRecognition_Azure.Data
 {
-    class Person
+    public class Person
     {
         public DetectedFace DetectedFace { get; set; }
         public Gender? Gender { get; set; }
         public double? Age { get; set; }
         public HairColorType Haircolor { get; set; }
         public HairType Hairtype { get; set; }
-        public FacialExpression Emotion { get; set; }
+        public string Emotion { get; set; }
         public GlassesType? GlassesType { get; set; }
 
         public Person(DetectedFace detectedFace)
         {
             DetectedFace = detectedFace;
-            
+
             GenerateAttributeData(DetectedFace.FaceAttributes);
         }
 
@@ -41,16 +39,15 @@ namespace FacialDetection_Emgu.Data
 
 
         #region Gets
+
         /// <summary>
         /// Gets the facial expression with the highest value
-        /// </summary>
-        /// <param name="emotionScore"></param>
+        /// </summary> 
+        /// <param name="em"></param>
         /// <returns></returns>
-        private FacialExpression GetFacialExpression(Emotion emotionScore)
-        {
-            Enum.TryParse((emotionScore.GetType().GetProperties().First(info => emotionScore.GetType().GetProperties().Max(propertyInfo => (double)propertyInfo.GetValue(emotionScore, null)) >= (double)info.GetValue(emotionScore, null)).Name), true,out FacialExpression retVal);
-            return retVal;
-        }
+        private string GetFacialExpression(Emotion em) => (em.GetType().GetProperties().First(info =>
+            em.GetType().GetProperties().Max(propertyInfo => (double) propertyInfo.GetValue(em, null)) >=
+            (double) info.GetValue(em, null)).Name);
 
         /// <summary>
         /// Gets if he has bald hair or not
@@ -81,8 +78,10 @@ namespace FacialDetection_Emgu.Data
 
             return retVal;
         }
+
         #endregion
 
-        public override string ToString() => $"{Gender.ToString()}, Hair: {Hairtype}, Haircolor: {Haircolor.ToString()}, Emotion: {Emotion}, Glasses: {GlassesType}";
+        public override string ToString() =>
+            $"{Gender.ToString()}, Hair: {Hairtype}, Haircolor: {Haircolor.ToString()}, Emotion: {Emotion}, Glasses: {GlassesType}";
     }
 }

@@ -4,29 +4,30 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 using Emgu.CV;
 using Microsoft.Azure.CognitiveServices.Vision.Face;
 using Microsoft.Azure.CognitiveServices.Vision.Face.Models;
 using Microsoft.Rest;
 using Brushes = System.Windows.Media.Brushes;
 using Pen = System.Windows.Media.Pen;
-using Person = FacialDetection_Emgu.Data.Person;
 using Point = System.Windows.Point;
+using Person = FacialRecognition_Azure.Data.Person;
 
 /*
  * Install-Package Microsoft.Azure.CognitiveServices.Vision.Face -Version 2.2.0-preview
- * https://portal.azure.com/#@htl-villach.at/resource/subscriptions/1671507b-42cd-42bf-ab70-9e0afef851b1/resourceGroups/Struckl_Container/providers/Microsoft.CognitiveServices/accounts/Struckl/quickstart
+ *
  */
 
-
-namespace FacialDetection_Emgu
+namespace FacialRecognition_Azure.Windows
 {
     /// <summary>
-    ///     Interaction logic for MainWindow.xaml
+    /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window
     {
@@ -49,6 +50,9 @@ namespace FacialDetection_Emgu
         private int _frameCnt;
         private bool _recording;
 
+        private DispatcherTimer _timer = new DispatcherTimer();
+        private List<Thread> _threads;
+
         #endregion
 
         public MainWindow()
@@ -57,25 +61,11 @@ namespace FacialDetection_Emgu
 
             _capture = new VideoCapture(0);
             _frame = new Mat();
+            _threads = new List<Thread>();
 
             _capture.ImageGrabbed += ProcessFrame;
         }
 
-        #region LocalSaves
-
-        /// <summary>
-        ///     Saves the error msg to file
-        /// </summary>
-        /// <param name="ex">Exception to save</param>
-        private void SaveErrorMsg(Exception ex)
-        {
-            using (StreamWriter writer = new StreamWriter(ErrorFilePath, true))
-            {
-                writer.WriteLine("[" + DateTime.Now + "] " + ex.Message + " | " + ex.StackTrace);
-            }
-        }
-
-        #endregion
 
         #region Heart
 
@@ -85,6 +75,15 @@ namespace FacialDetection_Emgu
         private void StartRecording()
         {
             _capture.Start();
+            _timer.Tick += new EventHandler(timer_Tick);
+            _timer.Interval = new TimeSpan(0, 0, 0, 10);
+            _timer.Start();
+
+        }
+
+        private void timer_Tick(object sender, EventArgs e)
+        {
+            Console.WriteLine("[" + DateTime.Now + "] " + _faceList.Count);
         }
 
         /// <summary>
@@ -109,15 +108,17 @@ namespace FacialDetection_Emgu
                 if (_frameCnt % SkpFrames == 0)
                 {
                     _capture.Retrieve(_frame, 0);
+
                     _faceList = await UploadAndDetectFaces(_frame.Bitmap);
 
                     BitmapSource source = BitmapToBitmapSource(_frame.Bitmap);
                     RenderTargetBitmap withRectangle = GeneratePictureWithRectangles(source);
                     Bitmap renderTargetBitmap = RenderTargetBitmapToBitmap(withRectangle);
 
+
                     _frameCnt = 0;
                     CamDisplayRaw.Dispatcher.Invoke(
-                        () => CamDisplayRaw.Source = BitmapToImageSource(renderTargetBitmap) );
+                        () => CamDisplayRaw.Source = BitmapToImageSource(renderTargetBitmap));
                 }
             }
         }
@@ -146,8 +147,9 @@ namespace FacialDetection_Emgu
                 HttpOperationResponse<IList<DetectedFace>> faceList =
                     await faceClient.Face.DetectWithStreamWithHttpMessagesAsync(stream, true, true, faceAttributes);
 
-               
                 return faceList.Body;
+
+
             }
             catch (APIErrorException apiErrorException)
             {
@@ -161,7 +163,6 @@ namespace FacialDetection_Emgu
                 return new List<DetectedFace>();
             }
         }
-
 
         /// <summary>
         /// Generates rendered picture with rectangles around the faces
@@ -184,9 +185,8 @@ namespace FacialDetection_Emgu
                 foreach (DetectedFace face in _faceList)
                 {
                     Person tmpPerson = new Person(face);
-
                     FormattedText formattedText = new FormattedText(
-                        tmpPerson.ToString(),
+                        tmpPerson.Emotion + ", " + tmpPerson.Gender,
                         CultureInfo.GetCultureInfo("en-us"),
                         FlowDirection.LeftToRight,
                         new Typeface("Verdana"),
@@ -214,10 +214,10 @@ namespace FacialDetection_Emgu
                 drawingContext.Close();
             }
 
-            // Redner the image
+            // Render the image
             RenderTargetBitmap faceWithRectBitmap = new RenderTargetBitmap(
-                (int) (bitmapSource.PixelWidth * _resizeFactor),
-                (int) (bitmapSource.PixelHeight * _resizeFactor),
+                (int)(bitmapSource.PixelWidth * _resizeFactor),
+                (int)(bitmapSource.PixelHeight * _resizeFactor),
                 96,
                 96,
                 PixelFormats.Pbgra32);
@@ -256,6 +256,7 @@ namespace FacialDetection_Emgu
         #endregion
 
         #region events
+
         /// <summary>
         /// Starts/stops the recording
         /// </summary>
@@ -276,6 +277,17 @@ namespace FacialDetection_Emgu
                 StartRecording();
             }
         }
+
+        /// <summary>
+        /// Display the data window
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void DisplayData_Click(object sender, RoutedEventArgs e)
+        {
+            throw new NotImplementedException("not done, went on with emgu");
+        }
+
         #endregion
 
         #region Converter
@@ -295,7 +307,7 @@ namespace FacialDetection_Emgu
         }
 
         /// <summary>
-        ///     Converts a bitmap image to a image source
+        /// Converts a bitmap image to a image source
         /// </summary>
         /// <param name="bitmap"></param>
         /// <returns></returns>
@@ -316,31 +328,7 @@ namespace FacialDetection_Emgu
         }
 
         /// <summary>
-        ///     Convert bitmap to stream
-        /// </summary>
-        /// <param name="bitmap"></param>
-        /// <returns></returns>
-        private Stream BitmapToStream(Bitmap bitmap)
-        {
-            MemoryStream retVal;
-            using (MemoryStream memory = new MemoryStream())
-            {
-                bitmap.Save(memory, ImageFormat.Bmp);
-                memory.Position = 0;
-                BitmapImage bitmapimage = new BitmapImage();
-                bitmapimage.BeginInit();
-                bitmapimage.StreamSource = memory;
-                bitmapimage.CacheOption = BitmapCacheOption.OnLoad;
-                bitmapimage.EndInit();
-
-                retVal = memory;
-            }
-
-            return retVal;
-        }
-
-        /// <summary>
-        ///     Convert bitmap to bitmapsource
+        /// Convert bitmap to bitmapsource
         /// </summary>
         /// <param name="bitmap"></param>
         /// <returns></returns>
@@ -361,7 +349,7 @@ namespace FacialDetection_Emgu
         }
 
         /// <summary>
-        ///     Convert bitmapimage to bitmap
+        /// Convert bitmapimage to bitmap
         /// </summary>
         /// <param name="image"></param>
         /// <returns></returns>
@@ -379,7 +367,7 @@ namespace FacialDetection_Emgu
         }
 
         /// <summary>
-        ///     Convert RenderTargetbitmap to bitmap
+        /// Convert RenderTargetbitmap to bitmap
         /// </summary>
         /// <param name="renderTargetBitmap"></param>
         /// <returns></returns>
@@ -401,6 +389,24 @@ namespace FacialDetection_Emgu
             }
 
             return BitmapImageToBitmap(bitmapImage);
+        }
+
+        #endregion
+
+
+
+        #region LocalSaves
+
+        /// <summary>
+        ///     Saves the error msg to file
+        /// </summary>
+        /// <param name="ex">Exception to save</param>
+        private void SaveErrorMsg(Exception ex)
+        {
+            using (StreamWriter writer = new StreamWriter(ErrorFilePath, true))
+            {
+                writer.WriteLine("[" + DateTime.Now + "] " + ex.Message + " | " + ex.StackTrace);
+            }
         }
 
         #endregion

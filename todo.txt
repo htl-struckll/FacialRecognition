@@ -1,0 +1,2 @@
+display data
+take a screenshot and search the person in the internet and check if he exists
