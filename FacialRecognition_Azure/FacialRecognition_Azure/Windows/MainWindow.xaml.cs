@@ -61,7 +61,6 @@ namespace FacialRecognition_Azure.Windows
 
             _capture = new VideoCapture(0);
             _frame = new Mat();
-            _threads = new List<Thread>();
 
             _capture.ImageGrabbed += ProcessFrame;
         }
@@ -70,24 +69,15 @@ namespace FacialRecognition_Azure.Windows
         #region Heart
 
         /// <summary>
-        ///     Starts recording
+        /// Starts recording
         /// </summary>
         private void StartRecording()
         {
             _capture.Start();
-            _timer.Tick += new EventHandler(timer_Tick);
-            _timer.Interval = new TimeSpan(0, 0, 0, 10);
-            _timer.Start();
-
-        }
-
-        private void timer_Tick(object sender, EventArgs e)
-        {
-            Console.WriteLine("[" + DateTime.Now + "] " + _faceList.Count);
         }
 
         /// <summary>
-        ///     Stops recording
+        /// Stops recording
         /// </summary>
         private void StopRecording()
         {
