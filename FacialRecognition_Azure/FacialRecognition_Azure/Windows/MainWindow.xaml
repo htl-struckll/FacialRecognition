@@ -13,6 +13,7 @@
             <Menu Margin="0,0,0,-0.4" Width="53">
                 <MenuItem Height="25" Margin="0" Width="53" Background="AliceBlue" Header="Other">
                     <MenuItem Click="DisplayData_Click"  Header="Display Data"/>
+                    <MenuItem Click="ClearThreads_Click"  Header="Clear Threads"/>
                 </MenuItem>
             </Menu>
         </ToolBar>

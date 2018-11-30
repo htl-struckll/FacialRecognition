@@ -22,7 +22,6 @@ using Thread = System.Threading.Thread;
 
 /*
  * Install-Package Microsoft.Azure.CognitiveServices.Vision.Face -Version 2.2.0-preview
- *
  */
 
 namespace FacialRecognition_Azure.Windows
@@ -52,7 +51,7 @@ namespace FacialRecognition_Azure.Windows
         private bool _recording;
         private Bitmap _imageBitmap;
         private readonly DispatcherTimer _timer;
-        private List<Thread> _threads;
+        //private List<Thread> _threads;
         #endregion
 
         public MainWindow()
@@ -62,13 +61,13 @@ namespace FacialRecognition_Azure.Windows
             _capture = new VideoCapture(0);
             _frame = new Mat();
 
-            _threads = new List<Thread>();
+            //_threads = new List<Thread>();
 
             _timer = new DispatcherTimer
             {
                 Interval = new TimeSpan(0, 0, 0, 10)
             };
-            _timer.Tick += DispatchTimerTick;
+            //_timer.Tick += DispatchTimerTick;
 
             _faceList = new List<DetectedFace>();
 
@@ -97,24 +96,6 @@ namespace FacialRecognition_Azure.Windows
         } 
 
         /// <summary>
-        /// Displays frame
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void CaptureDeviceGetsFrame(object sender, EventArgs e)
-        {
-            if (_capture != null && _capture.Ptr != IntPtr.Zero)
-            {
-                _frameCnt++;
-
-                if (_frameCnt % SkpFrames == 0)
-                    RenderAndProcessFrame();
-            }
-        }
-
-  
-
-        /// <summary>
         /// Uploading and rendering the picture
         /// </summary>
         private void RenderAndProcessFrame()
@@ -122,9 +103,10 @@ namespace FacialRecognition_Azure.Windows
             _capture.Retrieve(_frame, 0);
             _imageBitmap = _frame.Bitmap;
 
-            Thread tmp = new Thread(UploadAndDetectFaces);
-            _threads.Add(tmp);
-            _threads[_threads.Count - 1].Start();
+            Thread uploadThread = new Thread(UploadAndDetectFaces);
+            uploadThread.Start();
+            //_threads.Add(tmp);
+            //_threads[_threads.Count - 1].Start();
 
             BitmapSource source = BitmapToBitmapSource(_frame.Bitmap);
             RenderTargetBitmap withRectangle = GeneratePictureWithRectangles(source);
@@ -179,7 +161,7 @@ namespace FacialRecognition_Azure.Windows
         {
             DrawingVisual visual = new DrawingVisual();
             using (DrawingContext drawingContext = visual.RenderOpen()
-            ) //todo running out of sytem memory after 2493 pictures
+            ) 
             {
                 drawingContext.DrawImage(bitmapSource,
                     new Rect(0, 0, bitmapSource.Width, bitmapSource.Height));
@@ -199,20 +181,28 @@ namespace FacialRecognition_Azure.Windows
                         20,
                         Brushes.Red);
 
-                    // Draw a rectangle on the face.
-                    drawingContext.DrawRectangle(
+                    drawingContext.DrawEllipse(
                         Brushes.Transparent,
-                        new Pen(Brushes.Red, 2),
-                        new Rect(
-                            face.FaceRectangle.Left * _resizeFactor,
-                            face.FaceRectangle.Top * _resizeFactor,
-                            face.FaceRectangle.Width * _resizeFactor,
-                            face.FaceRectangle.Height * _resizeFactor
-                        )
-                    );
+                            new Pen(Brushes.Red, 2),
+                            new Point(face.FaceRectangle.Left * _resizeFactor + (face.FaceRectangle.Width * _resizeFactor) / 2,(face.FaceRectangle.Height*_resizeFactor) / 3 + face.FaceRectangle.Top * _resizeFactor)
+                        ,face.FaceRectangle.Width,
+                        face.FaceRectangle.Height
+                        );
 
-                    Point p = new Point((face.FaceRectangle.Left - 10) * _resizeFactor,
-                        (face.FaceRectangle.Top - 30) * _resizeFactor);
+                    //drawingContext.DrawRectangle(
+                    //    Brushes.Transparent,
+                    //    new Pen(Brushes.Red, 2),
+                    //    new Rect(
+                    //        face.FaceRectangle.Left * _resizeFactor,
+                    //        face.FaceRectangle.Top * _resizeFactor,
+                    //        face.FaceRectangle.Width * _resizeFactor,
+                    //        face.FaceRectangle.Height * _resizeFactor
+                    //    )
+                    //);
+
+                    //10,30
+                    Point p = new Point((face.FaceRectangle.Left - 50) * _resizeFactor,
+                        (face.FaceRectangle.Top - 70) * _resizeFactor);
 
                     drawingContext.DrawText(formattedText, p);
                 }
@@ -231,6 +221,18 @@ namespace FacialRecognition_Azure.Windows
             faceWithRectBitmap.Render(visual);
 
             return faceWithRectBitmap;
+        }
+
+        /// <summary>
+        /// Clearing the thread list
+        /// </summary>
+        private void ClearThreadList()
+        {
+            //_threads.ForEach(thread => thread.Abort());
+                
+            // ConsoleLog(_threads.Count + " threads cleared");
+            //_threads.Clear();
+            ConsoleLog("No thread list to clear");
         }
 
         #endregion
@@ -257,7 +259,7 @@ namespace FacialRecognition_Azure.Windows
         private void ErrorOutput(Exception ex)
         {
             if (ex is OutOfMemoryException)
-                Output(ex.Message + " OUT OF MEMORY WHYYYYYYYY HILFEEEEEEEEEEE");
+                Output("ATTENTION! This is a out of Memory exception. Please seak shelter in the nearest Stackoverflow forum!\n" + ex.Message + "|" + ex.StackTrace, "Error", icn: MessageBoxImage.Error);
             else
                 Output(ex.Message + "|" + ex.StackTrace, "Error", icn: MessageBoxImage.Error);
         }
@@ -271,6 +273,31 @@ namespace FacialRecognition_Azure.Windows
         #endregion
 
         #region events
+        /// <summary>
+        /// Clears the thread list
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ClearThreads_Click(object sender, RoutedEventArgs e)
+        {
+            ClearThreadList();
+        }
+
+        /// <summary>
+        /// Displays frame
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void CaptureDeviceGetsFrame(object sender, EventArgs e)
+        {
+            if (_capture != null && _capture.Ptr != IntPtr.Zero)
+            {
+                _frameCnt++;
+
+                if (_frameCnt % SkpFrames == 0)
+                    RenderAndProcessFrame();
+            }
+        }
 
         /// <summary>
         /// Starts/stops the recording
@@ -300,8 +327,7 @@ namespace FacialRecognition_Azure.Windows
         /// <param name="e"></param>
         private void DispatchTimerTick(object sender, EventArgs e)
         {
-            _threads = new List<Thread>();
-            ConsoleLog("new list");
+            ClearThreadList();
         }
 
         /// <summary>
@@ -434,5 +460,7 @@ namespace FacialRecognition_Azure.Windows
         }
 
         #endregion
+
+
     }
 }
