@@ -45,9 +45,17 @@ namespace FacialRecognition_Azure.Data
         /// </summary> 
         /// <param name="em"></param>
         /// <returns></returns>
-        private string GetFacialExpression(Emotion em) => (em.GetType().GetProperties().First(info =>
-            em.GetType().GetProperties().Max(propertyInfo => (double) propertyInfo.GetValue(em, null)) >=
-            (double) info.GetValue(em, null)).Name);
+        private string GetFacialExpression(Emotion em)
+        {
+            string retVal = string.Empty;
+
+
+
+            return retVal;
+        }
+        //(em.GetType().GetProperties().First(info =>
+            //em.GetType().GetProperties().Max(propertyInfo => (double) propertyInfo.GetValue(em, null)) >=
+            //(double) info.GetValue(em, null)).Name);
 
         /// <summary>
         /// Gets if he has bald hair or not
@@ -58,7 +66,7 @@ namespace FacialRecognition_Azure.Data
             hair.Bald > 90 ? HairType.Bald : HairType.NotBald;
 
         /// <summary>
-        /// Gets the hair colour //todo check with hairColors.max
+        /// Gets the hair colour 
         /// </summary>
         /// <param name="hairColors">List of haircolours found</param>
         /// <returns>The hair colour of the person</returns>

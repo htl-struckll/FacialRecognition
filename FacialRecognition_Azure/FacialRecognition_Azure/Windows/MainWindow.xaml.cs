@@ -18,6 +18,7 @@ using Brushes = System.Windows.Media.Brushes;
 using Pen = System.Windows.Media.Pen;
 using Point = System.Windows.Point;
 using Person = FacialRecognition_Azure.Data.Person;
+using Thread = System.Threading.Thread;
 
 /*
  * Install-Package Microsoft.Azure.CognitiveServices.Vision.Face -Version 2.2.0-preview
@@ -49,10 +50,9 @@ namespace FacialRecognition_Azure.Windows
         private const uint SkpFrames = 4; //to send the allowed amount of requests
         private int _frameCnt;
         private bool _recording;
-
-        private DispatcherTimer _timer = new DispatcherTimer();
+        private Bitmap _imageBitmap;
+        private readonly DispatcherTimer _timer;
         private List<Thread> _threads;
-
         #endregion
 
         public MainWindow()
@@ -62,9 +62,19 @@ namespace FacialRecognition_Azure.Windows
             _capture = new VideoCapture(0);
             _frame = new Mat();
 
-            _capture.ImageGrabbed += ProcessFrame;
-        }
+            _threads = new List<Thread>();
 
+            _timer = new DispatcherTimer
+            {
+                Interval = new TimeSpan(0, 0, 0, 10)
+            };
+            _timer.Tick += DispatchTimerTick;
+
+            _faceList = new List<DetectedFace>();
+
+            _capture.ImageGrabbed += CaptureDeviceGetsFrame;
+        }
+       
 
         #region Heart
 
@@ -74,7 +84,8 @@ namespace FacialRecognition_Azure.Windows
         private void StartRecording()
         {
             _capture.Start();
-        }
+            _timer.Start();
+        } 
 
         /// <summary>
         /// Stops recording
@@ -82,43 +93,53 @@ namespace FacialRecognition_Azure.Windows
         private void StopRecording()
         {
             _capture.Stop();
-        }
+            _timer.Stop();
+        } 
 
         /// <summary>
         /// Displays frame
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private async void ProcessFrame(object sender, EventArgs e)
+        private void CaptureDeviceGetsFrame(object sender, EventArgs e)
         {
             if (_capture != null && _capture.Ptr != IntPtr.Zero)
             {
                 _frameCnt++;
 
                 if (_frameCnt % SkpFrames == 0)
-                {
-                    _capture.Retrieve(_frame, 0);
-
-                    _faceList = await UploadAndDetectFaces(_frame.Bitmap);
-
-                    BitmapSource source = BitmapToBitmapSource(_frame.Bitmap);
-                    RenderTargetBitmap withRectangle = GeneratePictureWithRectangles(source);
-                    Bitmap renderTargetBitmap = RenderTargetBitmapToBitmap(withRectangle);
-
-
-                    _frameCnt = 0;
-                    CamDisplayRaw.Dispatcher.Invoke(
-                        () => CamDisplayRaw.Source = BitmapToImageSource(renderTargetBitmap));
-                }
+                    RenderAndProcessFrame();
             }
         }
 
+  
+
         /// <summary>
-        ///     Uploads the image to the cloud and returns the detected faces with info
+        /// Uploading and rendering the picture
         /// </summary>
-        /// <param name="imageBitmap">Bitmap of the image</param>
-        /// <returns>IList of detected faces</returns>
-        private async Task<IList<DetectedFace>> UploadAndDetectFaces(Bitmap imageBitmap)
+        private void RenderAndProcessFrame()
+        {
+            _capture.Retrieve(_frame, 0);
+            _imageBitmap = _frame.Bitmap;
+
+            Thread tmp = new Thread(UploadAndDetectFaces);
+            _threads.Add(tmp);
+            _threads[_threads.Count - 1].Start();
+
+            BitmapSource source = BitmapToBitmapSource(_frame.Bitmap);
+            RenderTargetBitmap withRectangle = GeneratePictureWithRectangles(source);
+            Bitmap renderTargetBitmap = RenderTargetBitmapToBitmap(withRectangle);
+
+
+            _frameCnt = 0;
+            CamDisplayRaw.Dispatcher.Invoke(
+                () => CamDisplayRaw.Source = BitmapToImageSource(renderTargetBitmap));
+        }
+
+        /// <summary>
+        /// Uploads the image to the cloud and returns the detected faces with info
+        /// </summary>
+        private async void  UploadAndDetectFaces()
         {
             IFaceClient faceClient = new FaceClient(new ApiKeyServiceClientCredentials(SubscriptionKey));
             faceClient.Endpoint =
@@ -133,24 +154,19 @@ namespace FacialRecognition_Azure.Windows
                 };
             try
             {
-                Stream stream = ImageToStream(Image.FromHbitmap(imageBitmap.GetHbitmap()), ImageFormat.Jpeg);
+                Stream stream = ImageToStream(Image.FromHbitmap(_imageBitmap.GetHbitmap()), ImageFormat.Jpeg);
                 HttpOperationResponse<IList<DetectedFace>> faceList =
                     await faceClient.Face.DetectWithStreamWithHttpMessagesAsync(stream, true, true, faceAttributes);
 
-                return faceList.Body;
-
-
+                _faceList = faceList.Body;
             }
             catch (APIErrorException apiErrorException)
             {
-                //SaveErrorMsg(apiErrorException);
                 ErrorOutput(apiErrorException);
-                return new List<DetectedFace>();
             }
             catch (Exception e)
             {
                 ErrorOutput(e);
-                return new List<DetectedFace>();
             }
         }
 
@@ -222,7 +238,7 @@ namespace FacialRecognition_Azure.Windows
         #region output
 
         /// <summary>
-        ///     Show pop up window to output
+        /// Show pop up window to output
         /// </summary>
         /// <param name="msg">Message to display</param>
         /// <param name="caption">Caption to display</param>
@@ -235,13 +251,19 @@ namespace FacialRecognition_Azure.Windows
         }
 
         /// <summary>
-        ///     Show error popup window
+        /// Show error popup window
         /// </summary>
         /// <param name="errMsg">Exception to display</param>
         private void ErrorOutput(Exception errMsg)
         {
             Output(errMsg.Message + "|" + errMsg.StackTrace, "Error", icn: MessageBoxImage.Error);
         }
+
+        /// <summary>
+        /// Logs msg to console
+        /// </summary>
+        /// <param name="msg"></param>
+        private void ConsoleLog(string msg) => Console.WriteLine("[" + DateTime.Now + "] " + msg);
 
         #endregion
 
@@ -266,6 +288,17 @@ namespace FacialRecognition_Azure.Windows
                 _recording = true;
                 StartRecording();
             }
+        }
+
+        /// <summary>
+        /// Dispatch timer event
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void DispatchTimerTick(object sender, EventArgs e)
+        {
+            _threads = new List<Thread>();
+            ConsoleLog("new list");
         }
 
         /// <summary>
@@ -382,8 +415,6 @@ namespace FacialRecognition_Azure.Windows
         }
 
         #endregion
-
-
 
         #region LocalSaves
 
