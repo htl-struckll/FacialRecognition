@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using FacialRecognition_Azure.Data.Enumteration;
+using FacialRecognition_Azure.Windows;
 using Microsoft.Azure.CognitiveServices.Vision.Face.Models;
 
 namespace FacialRecognition_Azure.Data
@@ -48,14 +50,23 @@ namespace FacialRecognition_Azure.Data
         private string GetFacialExpression(Emotion em)
         {
             string retVal = string.Empty;
+            double maxVal = 0;
 
+            Type emotionType = em.GetType();
+            foreach (PropertyInfo propertyInfo in emotionType.GetProperties())
+            {
+                string propName = propertyInfo.Name;
+                object propValAsObject = propertyInfo.GetValue(em);
 
+                if (propValAsObject is double && maxVal < (double)propValAsObject)
+                {
+                    maxVal = (double)propValAsObject;
+                    retVal = propName;
+                }
+            }
 
             return retVal;
         }
-        //(em.GetType().GetProperties().First(info =>
-            //em.GetType().GetProperties().Max(propertyInfo => (double) propertyInfo.GetValue(em, null)) >=
-            //(double) info.GetValue(em, null)).Name);
 
         /// <summary>
         /// Gets if he has bald hair or not

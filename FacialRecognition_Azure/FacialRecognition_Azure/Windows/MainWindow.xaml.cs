@@ -253,17 +253,20 @@ namespace FacialRecognition_Azure.Windows
         /// <summary>
         /// Show error popup window
         /// </summary>
-        /// <param name="errMsg">Exception to display</param>
-        private void ErrorOutput(Exception errMsg)
+        /// <param name="ex">Exception to display</param>
+        private void ErrorOutput(Exception ex)
         {
-            Output(errMsg.Message + "|" + errMsg.StackTrace, "Error", icn: MessageBoxImage.Error);
+            if (ex is OutOfMemoryException)
+                Output(ex.Message + " OUT OF MEMORY WHYYYYYYYY HILFEEEEEEEEEEE");
+            else
+                Output(ex.Message + "|" + ex.StackTrace, "Error", icn: MessageBoxImage.Error);
         }
 
         /// <summary>
         /// Logs msg to console
         /// </summary>
         /// <param name="msg"></param>
-        private void ConsoleLog(string msg) => Console.WriteLine("[" + DateTime.Now + "] " + msg);
+        public static void ConsoleLog(string msg) => Console.WriteLine("[" + DateTime.Now + "] " + msg);
 
         #endregion
 
