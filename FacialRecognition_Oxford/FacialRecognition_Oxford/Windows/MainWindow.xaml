@@ -1,0 +1,30 @@
+﻿<Window x:Class="FacialRecognition_Oxford.Windows.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Facialrecognition" Height="450" Width="800">
+    <Grid>
+        <ToolBar Margin="0,0,-0.4,0" Height="31" VerticalAlignment="Top">
+            <Menu Width="40">
+                <MenuItem x:Name="StartStopBtn"  Click="StartStop_Click" Background="AliceBlue"  Header="Start" Height="26" Margin="0" Width="43"/>
+            </Menu>
+            <Menu Width="46" Margin="0,0,0,-0.4">
+                <MenuItem Height="25" Margin="0" Width="46" Background="AliceBlue" Header="Other">
+                    <MenuItem Click="DisplayData_Click"  Header="Display Data"/>
+                </MenuItem>
+            </Menu>
+            <Menu Margin="0,0,0,0" Width="58">
+                <MenuItem Height="25" Margin="0" Width="58" Background="AliceBlue" Header="Settings">
+                    <ComboBox x:Name="CameraList" Loaded="CameraList_Loaded" Width="118" />
+                    <Slider x:Name="UploadFrequencySlider" TickPlacement="BottomRight" Value="1" Maximum="3" Minimum="0.2" Ticks="1" TickFrequency="0.3"></Slider>
+                </MenuItem>
+            </Menu>
+        </ToolBar>
+
+        <Image x:Name="DisplayImage"  Margin="10,42,-0.4,42"></Image>
+
+        <TextBlock x:Name="MessageArea" Background="LightGray" Margin="10,0,9.6,10" Height="27" VerticalAlignment="Bottom"/>
+    </Grid>
+</Window>

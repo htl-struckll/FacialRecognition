@@ -1,8 +1,7 @@
 ﻿<Application x:Class="FacialRecognition_Oxford.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:FacialRecognition_Oxford"
-             StartupUri="MainWindow.xaml">
+             StartupUri="Windows/MainWindow.xaml">
     <Application.Resources>
          
     </Application.Resources>

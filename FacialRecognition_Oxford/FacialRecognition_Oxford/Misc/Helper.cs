@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows;
 using Microsoft.ProjectOxford.Common.Contract;
 using Microsoft.ProjectOxford.Face.Contract;
 
@@ -38,7 +39,17 @@ namespace FacialRecognition_Oxford.Misc
         /// </summary>
         /// <param name="msg"></param>
         public static void ConsoleLog(string msg) =>
-            Console.WriteLine("[" + DateTime.Now.ToShortTimeString() + "] " + msg);
+            Console.WriteLine(@"[" + DateTime.Now.ToShortTimeString() + @"] " + msg);
+
+        /// <summary>
+        /// Window display function
+        /// </summary>
+        /// <param name="msg">Message</param>
+        /// <param name="caption">Caption</param>
+        /// <param name="btn">Button</param>
+        /// <param name="icon">icon</param>
+        public static void WindowLog(string msg, string caption = "Info", MessageBoxButton btn = MessageBoxButton.OK,
+            MessageBoxImage icon = MessageBoxImage.Information) => MessageBox.Show(msg, caption, btn, icon);
 
     }
 }

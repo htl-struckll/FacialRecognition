@@ -2,14 +2,16 @@
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using FacialRecognition_Oxford.Misc;
 using Microsoft.ProjectOxford.Common.Contract;
 using FaceAPI = Microsoft.ProjectOxford.Face.Contract;
 
-namespace FacialRecognition_Oxford.Misc
+namespace FacialRecognition_Oxford.Camera
 {
     class Visualization
     {
-        private static readonly SolidColorBrush Brush = new SolidColorBrush(Colors.Orange);
+        private static readonly SolidColorBrush MaleBrush = new SolidColorBrush(Colors.DeepSkyBlue);
+        private static readonly SolidColorBrush FemaleBrush = new SolidColorBrush(Colors.Pink);
         private static readonly Typeface Typeface = new Typeface(new FontFamily("Verdana"), FontStyles.Normal, FontWeights.Bold, FontStretches.Normal);
 
 
@@ -42,11 +44,15 @@ namespace FacialRecognition_Oxford.Misc
 
                     faceRect.Inflate(6 * annotationScale, 6 * annotationScale);
 
-                    drawingContext.DrawRectangle(
-                        Brushes.Transparent,
-                        new Pen(Brush, lineThickness),
-                        faceRect);
+                    SolidColorBrush genderBrush = face.FaceAttributes.Gender.ToLower().Equals("male")
+                        ? MaleBrush
+                        : FemaleBrush;
 
+                        drawingContext.DrawRectangle(
+                            Brushes.Transparent,
+                            new Pen(genderBrush, lineThickness),
+                            faceRect);
+                    
                     //Generate rectangle background for text and place text in it
                     if (text != string.Empty)
                     {
@@ -62,10 +68,10 @@ namespace FacialRecognition_Oxford.Misc
                             faceRect.Left + xpad - lineThickness / 2,
                             faceRect.Top - ft.Height - ypad + lineThickness / 2);
 
-                        Rect rect = ft.BuildHighlightGeometry(origin).GetRenderBounds(pen: null);
+                        Rect rect = ft.BuildHighlightGeometry(origin).GetRenderBounds(null);
                         rect.Inflate(xpad, ypad);
 
-                        drawingContext.DrawRectangle(Brush, null, rect);
+                        drawingContext.DrawRectangle(genderBrush, null, rect);
                         drawingContext.DrawText(ft, origin);
                     }
                 }

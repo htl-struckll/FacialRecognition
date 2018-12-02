@@ -1,7 +1,7 @@
 ﻿using EmotionScores = Microsoft.ProjectOxford.Common.Contract.EmotionScores;
 using Face = Microsoft.ProjectOxford.Face.Contract.Face;
 
-namespace FacialRecognition_Oxford.Misc
+namespace FacialRecognition_Oxford.Camera
 {
     class LiveCameraResult
     {
