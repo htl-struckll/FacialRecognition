@@ -1,4 +1,5 @@
-﻿using EmotionScores = Microsoft.ProjectOxford.Common.Contract.EmotionScores;
+﻿using Microsoft.ProjectOxford.Face.Contract;
+using EmotionScores = Microsoft.ProjectOxford.Common.Contract.EmotionScores;
 using Face = Microsoft.ProjectOxford.Face.Contract.Face;
 
 namespace FacialRecognition_Oxford.Camera
@@ -7,5 +8,6 @@ namespace FacialRecognition_Oxford.Camera
     {
         public Face[] Faces { get; set; } = null;
         public EmotionScores[] EmotionScores { get; set; } = null;
+
     }
 }

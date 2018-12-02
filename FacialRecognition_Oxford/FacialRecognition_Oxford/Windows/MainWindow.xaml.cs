@@ -13,7 +13,6 @@ using FacialRecognition_Oxford.VideoFrameAnalyzer;
 using Microsoft.ProjectOxford.Common.Contract;
 using Microsoft.ProjectOxford.Face.Contract;
 using OpenCvSharp.Extensions;
-using Window = System.Windows.Window;
 using FaceAPI = Microsoft.ProjectOxford.Face;
 using Rect = OpenCvSharp.Rect;
 
@@ -45,7 +44,7 @@ namespace FacialRecognition_Oxford.Windows
         private readonly CascadeClassifier _localFaceDetector;
         private bool _isFuseClientRemoteResults;
         private LiveCameraResult _latestResultsToDisplay;
-
+        private readonly List<Guid> _facesGuids;
         #endregion vars
 
         public MainWindow()
@@ -57,6 +56,7 @@ namespace FacialRecognition_Oxford.Windows
             _localFaceDetector = new CascadeClassifier();
             _latestResultsToDisplay = null;
             _faceClient = new FaceAPI.FaceServiceClient(SubscriptionKey, EnpointUri);
+            _facesGuids = new List<Guid>();
 
             InitEvents();
 
@@ -126,12 +126,43 @@ namespace FacialRecognition_Oxford.Windows
                 FaceAPI.FaceAttributeType.Emotion
             };
 
-            Face[] faces = await _faceClient.DetectAsync(jpg, returnFaceAttributes: attrs);
+            Face[] faces = await _faceClient.DetectAsync(jpg, returnFaceAttributes: attrs, returnFaceLandmarks: true);
             EmotionScores[] scores = faces.Select(e => e.FaceAttributes.Emotion).ToArray();
 
-            return new LiveCameraResult {Faces = faces, EmotionScores = scores};
+            foreach (var face in faces)
+            {
+                if (!await CheckIfFaceWasSeenBefore(face.FaceId))
+                {                    //todo call update in displayWindow with new data
+                    _facesGuids.Add(face.FaceId);
+                    Helper.ConsoleLog(face.FaceId + " is new!" + _facesGuids.Count);
+                }
+            }
+
+            return new LiveCameraResult { Faces = faces, EmotionScores = scores };
         }
 
+
+        /// <summary>
+        /// Checks if the person has been seen before 
+        /// </summary>
+        /// <param name="fId"></param>
+        /// <returns></returns>
+        private async Task<bool> CheckIfFaceWasSeenBefore(Guid fId)
+        {
+            if (_facesGuids.Count == 0)
+                return false;
+
+            bool retVal = false;
+            SimilarFace[] val = await _faceClient.FindSimilarAsync(fId, _facesGuids.ToArray());
+
+            foreach (var similarFace in val)
+            {
+                if (similarFace.Confidence > 0.5)
+                    retVal = true;
+            }
+
+            return retVal;
+        }
         /// <summary>
         /// Fuses the api and local detection and renders the new picture
         /// </summary>
