@@ -33,7 +33,7 @@ namespace FacialRecognition_Oxford.Windows
 
         #endregion const
 
-        private readonly FaceAPI.FaceServiceClient _faceClient;
+        public static readonly FaceAPI.FaceServiceClient _faceClient  = new FaceAPI.FaceServiceClient(SubscriptionKey, EnpointUri);
         private readonly FrameGrabber _grabber;
 
         private readonly ImageEncodingParam[] JpegParams =
@@ -45,22 +45,22 @@ namespace FacialRecognition_Oxford.Windows
         private bool _isFuseClientRemoteResults;
         private LiveCameraResult _latestResultsToDisplay;
         private readonly List<Guid> _facesGuids;
+        private StatisticsWindow _statisticsWindow;
+
         #endregion vars
 
         public MainWindow()
         {
             InitializeComponent();
 
-            _faceClient = null;
             _grabber = new FrameGrabber();
             _localFaceDetector = new CascadeClassifier();
             _latestResultsToDisplay = null;
-            _faceClient = new FaceAPI.FaceServiceClient(SubscriptionKey, EnpointUri);
             _facesGuids = new List<Guid>();
+            _statisticsWindow = null;
 
             InitEvents();
 
-            // Create local face detector. 
             _localFaceDetector.Load("Data/haarcascade_frontalface_alt2.xml");
         }
 
@@ -129,9 +129,9 @@ namespace FacialRecognition_Oxford.Windows
             Face[] faces = await _faceClient.DetectAsync(jpg, returnFaceAttributes: attrs, returnFaceLandmarks: true);
             EmotionScores[] scores = faces.Select(e => e.FaceAttributes.Emotion).ToArray();
 
-            foreach (var face in faces)
+            foreach (Face face in faces)
             {
-                if (!await CheckIfFaceWasSeenBefore(face.FaceId))
+                if (!await CheckIfFaceWasSeenBefore(face.FaceId,_faceClient,_facesGuids))
                 {                    //todo call update in displayWindow with new data
                     _facesGuids.Add(face.FaceId);
                     Helper.ConsoleLog(face.FaceId + " is new!" + _facesGuids.Count);
@@ -147,15 +147,15 @@ namespace FacialRecognition_Oxford.Windows
         /// </summary>
         /// <param name="fId"></param>
         /// <returns></returns>
-        private async Task<bool> CheckIfFaceWasSeenBefore(Guid fId)
+        public static async Task<bool> CheckIfFaceWasSeenBefore(Guid fId,FaceAPI.FaceServiceClient faceClient,List<Guid> guids)
         {
-            if (_facesGuids.Count == 0)
+            if (guids.Count == 0)
                 return false;
 
             bool retVal = false;
-            SimilarFace[] val = await _faceClient.FindSimilarAsync(fId, _facesGuids.ToArray());
+            SimilarFace[] val = await faceClient.FindSimilarAsync(fId, guids.ToArray());
 
-            foreach (var similarFace in val)
+            foreach (SimilarFace similarFace in val)
             {
                 if (similarFace.Confidence > 0.5)
                     retVal = true;
@@ -179,7 +179,7 @@ namespace FacialRecognition_Oxford.Windows
                 if (clientFaces != null && result.Faces != null)
                     MatchAndReplaceFaceRectangles(result.Faces, clientFaces);
 
-                visImage = Visualization.DrawOverlay(visImage, result.Faces, result.EmotionScores);
+                visImage = Visualization.DrawOverlay(visImage, result.Faces, result.EmotionScores).Result;
             }
 
             return visImage;
@@ -204,7 +204,7 @@ namespace FacialRecognition_Oxford.Windows
             {
                 Rect r = sortedClientRects[i];
                 sortedResultFaces[i].FaceRectangle =
-                    new FaceRectangle {Left = r.Left, Top = r.Top, Width = r.Width, Height = r.Height};
+                new FaceRectangle {Left = r.Left, Top = r.Top, Width = r.Width, Height = r.Height};
             }
         }
 
@@ -212,11 +212,7 @@ namespace FacialRecognition_Oxford.Windows
 
         #region events
 
-        /// <summary>
-        /// Start/stop the programm
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+        /// <summary> Start/stop the programm </summary>
         private async void StartStop_Click(object sender, RoutedEventArgs e)
         {
             if (((MenuItem) sender).Header.Equals("Start"))
@@ -240,18 +236,19 @@ namespace FacialRecognition_Oxford.Windows
             }
         }
 
+        /// <summary> Displays the statitic window </summary>
 
-        private void DisplayData_Click(object sender, RoutedEventArgs e)
+        private void DisplayStatistics_Click(object sender, RoutedEventArgs e)
         {
-            Helper.WindowLog("Not implemented yet", icon: MessageBoxImage.Error);
+            if (_statisticsWindow == null)
+            {
+                _statisticsWindow = new StatisticsWindow();
+                _statisticsWindow.Show();
+            }
         }
 
-        /// <summary>
-        /// Loads the cameras in a combobox
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void CameraList_Loaded(object sender, RoutedEventArgs e)
+        /// <summary> Loads the cameras in a combobox </summary>
+       private void CameraList_Loaded(object sender, RoutedEventArgs e)
         {
             int numCameras = _grabber.GetNumCameras();
 

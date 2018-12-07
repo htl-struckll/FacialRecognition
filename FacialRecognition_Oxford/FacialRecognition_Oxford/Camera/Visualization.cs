@@ -1,8 +1,12 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using FacialRecognition_Oxford.Misc;
+using FacialRecognition_Oxford.Windows;
 using Microsoft.ProjectOxford.Common.Contract;
 using FaceAPI = Microsoft.ProjectOxford.Face.Contract;
 
@@ -14,10 +18,16 @@ namespace FacialRecognition_Oxford.Camera
         private static readonly SolidColorBrush FemaleBrush = new SolidColorBrush(Colors.Pink);
         private static readonly Typeface Typeface = new Typeface(new FontFamily("Verdana"), FontStyles.Normal, FontWeights.Bold, FontStretches.Normal);
 
-
-        public static BitmapSource DrawOverlay(BitmapSource baseImage, FaceAPI.Face[] faces, EmotionScores[] emotionScores)
+        /// <summary>
+        /// Renders the rectangles
+        /// </summary>
+        /// <param name="baseImage">Base image</param>
+        /// <param name="faces">The faces to draw rectangle</param>
+        /// <param name="emotionScores">The emotion scores</param>
+        /// <returns>Rendered bitmapsource</returns>
+        public async static Task<BitmapSource> DrawOverlay(BitmapSource baseImage, FaceAPI.Face[] faces, EmotionScores[] emotionScores)
         {
-            double annotationScale = baseImage.PixelHeight / 320;
+           double annotationScale = baseImage.PixelHeight / 320;
 
             DrawingVisual visual = new DrawingVisual();
             DrawingContext drawingContext = visual.RenderOpen();

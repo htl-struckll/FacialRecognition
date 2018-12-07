@@ -180,7 +180,7 @@ namespace FacialRecognition_Oxford.VideoFrameAnalyzer
                     {
                         nextTask = _analysisTaskQueue.Take();
                     }
-                    catch (InvalidOperationException) { Helper.ConsoleLog("ouf"); } 
+                    catch (InvalidOperationException) { Helper.ConsoleLog("oof"); } 
 
                     if (nextTask != null)
                         OnNewResultAvailable(await nextTask);
@@ -188,7 +188,7 @@ namespace FacialRecognition_Oxford.VideoFrameAnalyzer
 
             }, TaskCreationOptions.LongRunning);
 
-            // Set up a timer object that will trigger the frame-grab at a regular interval.
+            // Set up a timer object that will trigger the frame-grab at interval.
             _timer = new Timer(async state  =>
             {
                 await _timerMutex.WaitAsync();
@@ -281,7 +281,6 @@ namespace FacialRecognition_Oxford.VideoFrameAnalyzer
         /// <returns>The nunmber of cameras</returns>
         public int GetNumCameras()
         {
-            // Count cameras manually
             if (_numCameras == -1)
             {
                 _numCameras = 0;
@@ -300,6 +299,11 @@ namespace FacialRecognition_Oxford.VideoFrameAnalyzer
             return _numCameras;
         }
 
+        /// <summary>
+        /// Analyze the frame
+        /// </summary>
+        /// <param name="frame"></param>
+        /// <returns></returns>
         protected async Task<NewResultEventArgs> DoAnalyzeFrame(VideoFrame frame)
         {
             CancellationTokenSource source = new CancellationTokenSource();

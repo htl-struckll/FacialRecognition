@@ -1,4 +1,4 @@
-﻿using Microsoft.ProjectOxford.Face.Contract;
+﻿using System;
 using EmotionScores = Microsoft.ProjectOxford.Common.Contract.EmotionScores;
 using Face = Microsoft.ProjectOxford.Face.Contract.Face;
 

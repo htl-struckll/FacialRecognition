@@ -12,7 +12,7 @@
             </Menu>
             <Menu Width="46" Margin="0,0,0,-0.4">
                 <MenuItem Height="25" Margin="0" Width="46" Background="AliceBlue" Header="Other">
-                    <MenuItem Click="DisplayData_Click"  Header="Display Data"/>
+                    <MenuItem Click="DisplayStatistics_Click"  Header="Display Statistics"/>
                 </MenuItem>
             </Menu>
             <Menu Margin="0,0,0,0" Width="58">
