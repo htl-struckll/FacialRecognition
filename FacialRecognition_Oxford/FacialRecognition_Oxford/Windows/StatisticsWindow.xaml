@@ -3,10 +3,23 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:FacialRecognition_Oxford.Windows"
+        xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
         mc:Ignorable="d"
-        Title="StatisticsWindow" Height="450" Width="800">
-    <Grid>
-        
+        Title="StatisticsWindow" Height="634.5" Width="1031">
+    <Grid Loaded="Window_Loaded">
+        <ToolBar Margin="0,0,-0.4,0" Height="31" VerticalAlignment="Top">
+            <Menu Width="51">
+                <MenuItem Click="Reset_Click" Background="AliceBlue"  Header="Reset" Height="26" Margin="0" Width="51"/>
+            </Menu>
+        </ToolBar>
+
+        <lvc:PieChart LegendLocation="Bottom" BorderThickness="1px" BorderBrush="Black" Hoverable="True" DataTooltip="{x:Null}" Margin="589,36,10,267">
+            <lvc:PieChart.Series>
+                <lvc:PieSeries x:Name="MalePieSeries" Title="Male" Fill="SkyBlue" Values="0" DataLabels="True"
+                               LabelPoint="{Binding PointLabel}"/>
+                <lvc:PieSeries x:Name="FemalePieSeries" Title="Female" Fill="RosyBrown" Values="0" DataLabels="True" 
+                               LabelPoint="{Binding PointLabel}"/>
+            </lvc:PieChart.Series>
+        </lvc:PieChart>
     </Grid>
 </Window>

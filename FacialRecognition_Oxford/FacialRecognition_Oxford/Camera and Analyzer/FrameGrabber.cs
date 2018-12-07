@@ -2,7 +2,7 @@
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
-using FacialRecognition_Oxford.Camera;
+using FacialRecognition_Oxford.Data;
 using FacialRecognition_Oxford.Events;
 using FacialRecognition_Oxford.Misc;
 using OpenCvSharp;

@@ -14,14 +14,14 @@ namespace FacialRecognition_Oxford.Misc
         /// Get the dominant emotion as string
         /// </summary>
         /// <param name="scores"></param>
-        /// <returns></returns>
+        /// <returns>The dominant emotion as a string</returns>
         public static string GetDominantEmotionAsString(EmotionScores scores) => scores.ToRankedList().First().Key;
 
         /// <summary>
         /// Get the face attributes as string
         /// </summary>
         /// <param name="attributes"></param>
-        /// <returns></returns>
+        /// <returns>The face attributes as a string</returns>
         public static string GetFaceAttributesAsString(FaceAttributes attributes)
         {
             List<string> retVal = new List<string>();
@@ -29,7 +29,7 @@ namespace FacialRecognition_Oxford.Misc
             if(attributes.Gender != null)
                 retVal.Add(attributes.Gender);
             if(attributes.Age > 0)
-                retVal.Add("Age: " + attributes.Age);
+                retVal.Add("Glasses: " + attributes.Glasses);
 
             return string.Join(", ", retVal);
         }

@@ -1,16 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using FacialRecognition_Oxford.Misc;
-using FacialRecognition_Oxford.Windows;
 using Microsoft.ProjectOxford.Common.Contract;
 using FaceAPI = Microsoft.ProjectOxford.Face.Contract;
 
-namespace FacialRecognition_Oxford.Camera
+namespace FacialRecognition_Oxford.VideoFrameAnalyzer
 {
     class Visualization
     {
@@ -25,7 +22,7 @@ namespace FacialRecognition_Oxford.Camera
         /// <param name="faces">The faces to draw rectangle</param>
         /// <param name="emotionScores">The emotion scores</param>
         /// <returns>Rendered bitmapsource</returns>
-        public async static Task<BitmapSource> DrawOverlay(BitmapSource baseImage, FaceAPI.Face[] faces, EmotionScores[] emotionScores)
+        public static BitmapSource DrawOverlay(BitmapSource baseImage, FaceAPI.Face[] faces, EmotionScores[] emotionScores)
         {
            double annotationScale = baseImage.PixelHeight / 320;
 

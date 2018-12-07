@@ -1,6 +1,4 @@
-﻿using System.Windows;
-
-namespace FacialRecognition_Oxford
+﻿namespace FacialRecognition_Oxford.Misc
 {
     /// <summary>
     /// Interaction logic for App.xaml

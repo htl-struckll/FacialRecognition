@@ -7,7 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using OpenCvSharp;
-using FacialRecognition_Oxford.Camera;
+using FacialRecognition_Oxford.Data;
 using FacialRecognition_Oxford.Misc;
 using FacialRecognition_Oxford.VideoFrameAnalyzer;
 using Microsoft.ProjectOxford.Common.Contract;
@@ -33,19 +33,18 @@ namespace FacialRecognition_Oxford.Windows
 
         #endregion const
 
-        public static readonly FaceAPI.FaceServiceClient _faceClient  = new FaceAPI.FaceServiceClient(SubscriptionKey, EnpointUri);
+        public static readonly FaceAPI.FaceServiceClient FaceClient  = new FaceAPI.FaceServiceClient(SubscriptionKey, EnpointUri);
         private readonly FrameGrabber _grabber;
-
-        private readonly ImageEncodingParam[] JpegParams =
+        private static readonly ImageEncodingParam[] JpegParams =
         {
             new ImageEncodingParam(ImwriteFlags.JpegQuality, 60)
         };
-
         private readonly CascadeClassifier _localFaceDetector;
         private bool _isFuseClientRemoteResults;
         private LiveCameraResult _latestResultsToDisplay;
         private readonly List<Guid> _facesGuids;
-        private StatisticsWindow _statisticsWindow;
+        private readonly StatisticsWindow _statisticsWindow;
+        public static StatisticsData StatisticsData;
 
         #endregion vars
 
@@ -57,7 +56,8 @@ namespace FacialRecognition_Oxford.Windows
             _localFaceDetector = new CascadeClassifier();
             _latestResultsToDisplay = null;
             _facesGuids = new List<Guid>();
-            _statisticsWindow = null;
+            _statisticsWindow = new StatisticsWindow();
+            StatisticsData = new StatisticsData();
 
             InitEvents();
 
@@ -126,19 +126,24 @@ namespace FacialRecognition_Oxford.Windows
                 FaceAPI.FaceAttributeType.Emotion
             };
 
-            Face[] faces = await _faceClient.DetectAsync(jpg, returnFaceAttributes: attrs, returnFaceLandmarks: true);
+            Face[] faces = await FaceClient.DetectAsync(jpg, returnFaceAttributes: attrs, returnFaceLandmarks: true);
             EmotionScores[] scores = faces.Select(e => e.FaceAttributes.Emotion).ToArray();
 
             foreach (Face face in faces)
             {
-                if (!await CheckIfFaceWasSeenBefore(face.FaceId,_faceClient,_facesGuids))
-                {                    //todo call update in displayWindow with new data
+                if (!await CheckIfFaceWasSeenBefore(face.FaceId, FaceClient, _facesGuids))
+                {
                     _facesGuids.Add(face.FaceId);
+                    StatisticsData.UpdateStatistics(face.FaceAttributes);
+
+                    if (_statisticsWindow.IsLoaded) 
+                        _statisticsWindow.SetStatistics(StatisticsData);
+
                     Helper.ConsoleLog(face.FaceId + " is new!" + _facesGuids.Count);
                 }
             }
 
-            return new LiveCameraResult { Faces = faces, EmotionScores = scores };
+            return new LiveCameraResult {Faces = faces, EmotionScores = scores};
         }
 
 
@@ -157,7 +162,7 @@ namespace FacialRecognition_Oxford.Windows
 
             foreach (SimilarFace similarFace in val)
             {
-                if (similarFace.Confidence > 0.5)
+                if (similarFace.Confidence > 0.4)
                     retVal = true;
             }
 
@@ -179,7 +184,7 @@ namespace FacialRecognition_Oxford.Windows
                 if (clientFaces != null && result.Faces != null)
                     MatchAndReplaceFaceRectangles(result.Faces, clientFaces);
 
-                visImage = Visualization.DrawOverlay(visImage, result.Faces, result.EmotionScores).Result;
+                visImage = Visualization.DrawOverlay(visImage, result.Faces, result.EmotionScores);
             }
 
             return visImage;
@@ -238,14 +243,7 @@ namespace FacialRecognition_Oxford.Windows
 
         /// <summary> Displays the statitic window </summary>
 
-        private void DisplayStatistics_Click(object sender, RoutedEventArgs e)
-        {
-            if (_statisticsWindow == null)
-            {
-                _statisticsWindow = new StatisticsWindow();
-                _statisticsWindow.Show();
-            }
-        }
+        private void DisplayStatistics_Click(object sender, RoutedEventArgs e) => _statisticsWindow.Show();
 
         /// <summary> Loads the cameras in a combobox </summary>
        private void CameraList_Loaded(object sender, RoutedEventArgs e)

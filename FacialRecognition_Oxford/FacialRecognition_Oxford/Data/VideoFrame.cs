@@ -1,7 +1,7 @@
 ﻿using System;
 using OpenCvSharp;
 
-namespace FacialRecognition_Oxford.VideoFrameAnalyzer
+namespace FacialRecognition_Oxford.Data
 {
     struct VideoFrameMetadata
     {

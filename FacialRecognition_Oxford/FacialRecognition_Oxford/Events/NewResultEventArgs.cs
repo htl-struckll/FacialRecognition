@@ -1,5 +1,5 @@
 ﻿using System;
-using FacialRecognition_Oxford.Camera;
+using FacialRecognition_Oxford.Data;
 using FacialRecognition_Oxford.VideoFrameAnalyzer;
 
 namespace FacialRecognition_Oxford.Events

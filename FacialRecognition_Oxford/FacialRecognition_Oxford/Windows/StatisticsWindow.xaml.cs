@@ -1,17 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+﻿using System.Windows;
 using FacialRecognition_Oxford.Data;
+using System;
+using System.ComponentModel;
+using System.Windows.Controls;
+using FacialRecognition_Oxford.Misc;
+using LiveCharts;
+using LiveCharts.Wpf;
+/*
+ * Install-Package LiveCharts.Wpf
+ */
 
 namespace FacialRecognition_Oxford.Windows
 {
@@ -20,14 +17,30 @@ namespace FacialRecognition_Oxford.Windows
     /// </summary>
     public partial class StatisticsWindow : Window
     {
+        public Func<ChartPoint, string> PointLabel { get; set; }
+
+        public new bool IsLoaded = false;
+
         public StatisticsWindow()
         {
             InitializeComponent();
+            PointLabel = chartPoint => $"{chartPoint.Y} ({chartPoint.Participation:P})";
+
+            DataContext = this;
         }
 
         public void SetStatistics(StatisticsData data)
         {
+            Helper.ConsoleLog("Setting: " + data);
 
+            MalePieSeries.Dispatcher.Invoke(
+                () => MalePieSeries.Values = new ChartValues<int>() { data.AmountMale });
+            FemalePieSeries.Dispatcher.Invoke(
+                () => FemalePieSeries.Values = new ChartValues<int>() { data.AmountFemale });
         }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e) => IsLoaded = true;
+
+        private void Reset_Click(object sender, RoutedEventArgs e) => MainWindow.StatisticsData = new StatisticsData();
     }
 }
