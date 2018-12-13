@@ -123,7 +123,8 @@ namespace FacialRecognition_Oxford.Windows
             {
                 FaceAPI.FaceAttributeType.Age,
                 FaceAPI.FaceAttributeType.Gender,
-                FaceAPI.FaceAttributeType.Emotion
+                FaceAPI.FaceAttributeType.Emotion,
+            
             };
 
             Face[] faces = await FaceClient.DetectAsync(jpg, returnFaceAttributes: attrs, returnFaceLandmarks: true);
@@ -141,6 +142,9 @@ namespace FacialRecognition_Oxford.Windows
 
                     Helper.ConsoleLog(face.FaceId + " is new!" + _facesGuids.Count);
                 }
+                
+                StatisticsData.UpdateHappiness(face.FaceAttributes.Emotion.Happiness); //todo ask what is intelligent (only first person)
+                _statisticsWindow.SetHappiness(StatisticsData.Happiness);
             }
 
             return new LiveCameraResult {Faces = faces, EmotionScores = scores};

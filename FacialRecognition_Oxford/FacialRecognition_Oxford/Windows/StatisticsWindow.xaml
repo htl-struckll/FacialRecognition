@@ -21,5 +21,18 @@
                                LabelPoint="{Binding PointLabel}"/>
             </lvc:PieChart.Series>
         </lvc:PieChart>
+
+        <lvc:AngularGauge BorderBrush="Black" BorderThickness="1px" x:Name="HappinessGauge" Value="0" FromValue="0" ToValue="100"
+                          LabelsStep="50" TicksStep="10" Wedge="180"
+                          TicksForeground="White" Foreground="White" 
+                          FontWeight="Bold" FontSize="16"
+                          SectionsInnerRadius=".5" Margin="10,36,458.8,266.8">
+            <lvc:AngularGauge.Sections>
+                <lvc:AngularSection FromValue="0" ToValue="33" Fill="Red"/>
+                <lvc:AngularSection FromValue="34" ToValue="66" Fill="Orange"/>
+                <lvc:AngularSection FromValue="67" ToValue="100" Fill="Green"/>
+            </lvc:AngularGauge.Sections>
+        </lvc:AngularGauge>
+
     </Grid>
 </Window>

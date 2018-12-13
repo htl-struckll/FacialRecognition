@@ -9,12 +9,12 @@ namespace FacialRecognition_Oxford.Data
         public int Amount { get; set; }
         public int AmountMale { get; set; }
         public int AmountFemale { get; set; }
+        public double Happiness { get; set; }
+
 
         public StatisticsData(){FaceAttributes = new List<FaceAttributes>();}
 
-        /// <summary>
-        /// Sets the date for this object
-        /// </summary>
+        /// <summary> Sets the date for this object </summary>
         public void UpdateStatistics(FaceAttributes attribute)
         {
             FaceAttributes.Add(attribute); 
@@ -25,7 +25,13 @@ namespace FacialRecognition_Oxford.Data
                 AmountMale++;
             else
                 AmountFemale++;
+
+            Happiness = attribute.Emotion.Happiness;
         }
+
+           
+        /// <summary> Set the happiness data </summary>
+        public void UpdateHappiness(double happiness) => Happiness = happiness;
 
         public override string ToString() =>
             $"Amount: {Amount}, Amount male: {AmountMale}, Amount female: {AmountFemale}";

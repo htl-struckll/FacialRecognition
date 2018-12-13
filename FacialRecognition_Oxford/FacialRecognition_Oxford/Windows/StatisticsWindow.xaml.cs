@@ -18,7 +18,6 @@ namespace FacialRecognition_Oxford.Windows
     public partial class StatisticsWindow : Window
     {
         public Func<ChartPoint, string> PointLabel { get; set; }
-
         public new bool IsLoaded = false;
 
         public StatisticsWindow()
@@ -37,6 +36,14 @@ namespace FacialRecognition_Oxford.Windows
                 () => MalePieSeries.Values = new ChartValues<int>() { data.AmountMale });
             FemalePieSeries.Dispatcher.Invoke(
                 () => FemalePieSeries.Values = new ChartValues<int>() { data.AmountFemale });
+        }
+
+        public void SetHappiness(double happiness)
+        {
+            Helper.ConsoleLog("Updateing happ");
+
+            HappinessGauge.Dispatcher.Invoke(
+                () => HappinessGauge.Value = happiness * 100);
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e) => IsLoaded = true;
