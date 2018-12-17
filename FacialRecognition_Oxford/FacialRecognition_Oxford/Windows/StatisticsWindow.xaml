@@ -22,13 +22,17 @@
             </lvc:PieChart.Series>
         </lvc:PieChart>
 
-        <lvc:CartesianChart Series="{Binding SeriesCollection}"  LegendLocation="Right" Margin="30,36,457.8,261.8">
-            <lvc:CartesianChart.AxisX>
-                <lvc:Axis Title="Year" LabelFormatter="{Binding XFormatter}"></lvc:Axis>
-            </lvc:CartesianChart.AxisX>
-            <lvc:CartesianChart.AxisY>
-                <lvc:Axis Title="Population" LabelFormatter="{Binding YFormatter}"></lvc:Axis>
-            </lvc:CartesianChart.AxisY>
-        </lvc:CartesianChart>
+        <lvc:AngularGauge BorderBrush="Black" BorderThickness="1px" x:Name="HappinessGauge" Value="0" FromValue="0" ToValue="100"
+                          LabelsStep="50" TicksStep="10" Wedge="180"
+                          TicksForeground="White" Foreground="White" 
+                          FontWeight="Bold" FontSize="16"
+                          SectionsInnerRadius=".5" Margin="10,36,458.8,266.8">
+            <lvc:AngularGauge.Sections>
+                <lvc:AngularSection FromValue="0" ToValue="33" Fill="Red"/>
+                <lvc:AngularSection FromValue="34" ToValue="66" Fill="Orange"/>
+                <lvc:AngularSection FromValue="67" ToValue="100" Fill="Green"/>
+            </lvc:AngularGauge.Sections>
+        </lvc:AngularGauge>
+
     </Grid>
 </Window>
