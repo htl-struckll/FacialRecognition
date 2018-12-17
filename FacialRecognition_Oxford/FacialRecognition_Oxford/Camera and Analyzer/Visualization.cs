@@ -49,6 +49,8 @@ namespace FacialRecognition_Oxford.VideoFrameAnalyzer
                     if (emotionScores?[i] != null)
                         text += ", " + Helper.GetDominantEmotionAsString(emotionScores[i]);
 
+                    text += face.FaceAttributes.Age;
+
                     faceRect.Inflate(6 * annotationScale, 6 * annotationScale);
 
                     SolidColorBrush genderBrush = face.FaceAttributes.Gender.ToLower().Equals("male")

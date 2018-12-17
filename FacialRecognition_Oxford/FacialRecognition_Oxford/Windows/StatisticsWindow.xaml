@@ -21,5 +21,14 @@
                                LabelPoint="{Binding PointLabel}"/>
             </lvc:PieChart.Series>
         </lvc:PieChart>
+
+        <lvc:CartesianChart Series="{Binding SeriesCollection}"  LegendLocation="Right" Margin="30,36,457.8,261.8">
+            <lvc:CartesianChart.AxisX>
+                <lvc:Axis Title="Year" LabelFormatter="{Binding XFormatter}"></lvc:Axis>
+            </lvc:CartesianChart.AxisX>
+            <lvc:CartesianChart.AxisY>
+                <lvc:Axis Title="Population" LabelFormatter="{Binding YFormatter}"></lvc:Axis>
+            </lvc:CartesianChart.AxisY>
+        </lvc:CartesianChart>
     </Grid>
 </Window>

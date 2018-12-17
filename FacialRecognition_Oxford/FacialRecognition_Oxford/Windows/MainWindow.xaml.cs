@@ -123,7 +123,8 @@ namespace FacialRecognition_Oxford.Windows
             {
                 FaceAPI.FaceAttributeType.Age,
                 FaceAPI.FaceAttributeType.Gender,
-                FaceAPI.FaceAttributeType.Emotion
+                FaceAPI.FaceAttributeType.Emotion,
+            
             };
 
             Face[] faces = await FaceClient.DetectAsync(jpg, returnFaceAttributes: attrs, returnFaceLandmarks: true);
