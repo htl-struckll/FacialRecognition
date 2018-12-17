@@ -12,12 +12,12 @@ namespace FacialRecognition_Oxford.Data
         public double Happiness { get; set; }
 
 
-        public StatisticsData(){FaceAttributes = new List<FaceAttributes>();}
+        public StatisticsData() { FaceAttributes = new List<FaceAttributes>(); }
 
         /// <summary> Sets the date for this object </summary>
         public void UpdateStatistics(FaceAttributes attribute)
         {
-            FaceAttributes.Add(attribute); 
+            FaceAttributes.Add(attribute);
 
             Amount++;
 
@@ -29,7 +29,7 @@ namespace FacialRecognition_Oxford.Data
             Happiness = attribute.Emotion.Happiness;
         }
 
-           
+
         /// <summary> Set the happiness data </summary>
         public void UpdateHappiness(double happiness) => Happiness = happiness;
 

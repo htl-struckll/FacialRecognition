@@ -48,7 +48,7 @@ namespace FacialRecognition_Oxford.Windows
 
         #endregion vars
 
-        public MainWindow()
+        public MainWindow()                                                                                                                          
         {
             InitializeComponent();
 
@@ -61,7 +61,7 @@ namespace FacialRecognition_Oxford.Windows
 
             InitEvents();
 
-            _localFaceDetector.Load("Data/haarcascade_frontalface_alt2.xml");
+            _localFaceDetector.Load("Data/haarcascade_frontalface_alt2.xml");      
         }
 
         #region methods

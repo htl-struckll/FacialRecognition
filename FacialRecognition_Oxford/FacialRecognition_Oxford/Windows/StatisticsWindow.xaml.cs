@@ -40,8 +40,6 @@ namespace FacialRecognition_Oxford.Windows
 
         public void SetHappiness(double happiness)
         {
-            Helper.ConsoleLog("Updateing happ");
-
             HappinessGauge.Dispatcher.Invoke(
                 () => HappinessGauge.Value = happiness * 100);
         }
