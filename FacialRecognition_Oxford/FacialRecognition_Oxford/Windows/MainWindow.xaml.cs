@@ -28,7 +28,7 @@ namespace FacialRecognition_Oxford.Windows
 
         #region const
 
-        private const string SubscriptionKey = "eafef65edfe04fb5b70a3f9739cc1618";
+        private const string SubscriptionKey = "e785fa951218458694e7688da94eb273";
         private const string EnpointUri = "https://westeurope.api.cognitive.microsoft.com/face/v1.0";
 
         #endregion const
@@ -48,7 +48,7 @@ namespace FacialRecognition_Oxford.Windows
 
         #endregion vars
 
-        public MainWindow()
+        public MainWindow()                                                                                                                          
         {
             InitializeComponent();
 
@@ -61,7 +61,7 @@ namespace FacialRecognition_Oxford.Windows
 
             InitEvents();
 
-            _localFaceDetector.Load("Data/haarcascade_frontalface_alt2.xml");
+            _localFaceDetector.Load("Data/haarcascade_frontalface_alt2.xml");      
         }
 
         #region methods
@@ -124,6 +124,7 @@ namespace FacialRecognition_Oxford.Windows
                 FaceAPI.FaceAttributeType.Age,
                 FaceAPI.FaceAttributeType.Gender,
                 FaceAPI.FaceAttributeType.Emotion,
+                FaceAPI.FaceAttributeType.Hair
             
             };
 
@@ -140,11 +141,11 @@ namespace FacialRecognition_Oxford.Windows
                     if (_statisticsWindow.IsLoaded) 
                         _statisticsWindow.SetStatistics(StatisticsData);
 
-                    Helper.ConsoleLog(face.FaceId + " is new!" + _facesGuids.Count);
+                    Helper.ConsoleLog(face.FaceId + " is new! [" + _facesGuids.Count + "]");
                 }
                 
                 StatisticsData.UpdateHappiness(face.FaceAttributes.Emotion.Happiness); //todo ask what is intelligent (only first person)
-                _statisticsWindow.SetHappiness(StatisticsData.Happiness);
+                _statisticsWindow.SetHappinessGauge(StatisticsData.Happiness);
             }
 
             return new LiveCameraResult {Faces = faces, EmotionScores = scores};
