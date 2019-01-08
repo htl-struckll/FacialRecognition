@@ -5,15 +5,15 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
         mc:Ignorable="d"
-        Title="StatisticsWindow" Height="634.5" Width="1031">
-    <Grid Loaded="Window_Loaded">                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
+        Title="StatisticsWindow" Height="699.5" Width="1031">
+    <Grid Loaded="Window_Loaded">
         <ToolBar Margin="0,0,-0.4,0" Height="31" VerticalAlignment="Top">
             <Menu Width="51">
                 <MenuItem Click="Reset_Click" Background="AliceBlue"  Header="Reset" Height="26" Margin="0" Width="51"/>
             </Menu>
         </ToolBar>
 
-        <lvc:PieChart LegendLocation="Bottom" BorderThickness="1px" BorderBrush="Black" Hoverable="True" DataTooltip="{x:Null}" Margin="589,36,10,267">
+        <lvc:PieChart LegendLocation="Bottom" BorderThickness="1px" BorderBrush="Black" Hoverable="True" DataTooltip="{x:Null}" Margin="589,36,10,314">
             <lvc:PieChart.Series>
                 <lvc:PieSeries x:Name="MalePieSeries" Title="Male" Fill="SkyBlue" Values="0" DataLabels="True"
                                LabelPoint="{Binding PointLabel}"/>
@@ -26,12 +26,21 @@
                           LabelsStep="50" TicksStep="10" Wedge="180"
                           TicksForeground="White" Foreground="White" 
                           FontWeight="Bold" FontSize="16"
-                          SectionsInnerRadius=".5" Margin="10,36,458.8,266.8">
+                          SectionsInnerRadius=".5" Margin="10,36,459,314">
             <lvc:AngularGauge.Sections>
                 <lvc:AngularSection FromValue="0" ToValue="33" Fill="Red"/>
                 <lvc:AngularSection FromValue="34" ToValue="66" Fill="Orange"/>
                 <lvc:AngularSection FromValue="67" ToValue="100" Fill="Green"/>
             </lvc:AngularGauge.Sections>
         </lvc:AngularGauge>
+
+        <lvc:CartesianChart x:Name="HairColourLineChart" BorderThickness="1px"  BorderBrush="Black" Series="{Binding SeriesCollection}"  LegendLocation="Right" Margin="10,355,459,10">
+            <lvc:CartesianChart.AxisX>
+                <lvc:Axis Title="Recognized People" Foreground="Black" LabelFormatter="{Binding XFormatter}"></lvc:Axis>
+            </lvc:CartesianChart.AxisX>
+            <lvc:CartesianChart.AxisY>
+                <lvc:Axis Title="Amount" Foreground="Black"  LabelFormatter="{Binding YFormatter}"></lvc:Axis>
+            </lvc:CartesianChart.AxisY>
+        </lvc:CartesianChart>
     </Grid>
 </Window>

@@ -124,6 +124,7 @@ namespace FacialRecognition_Oxford.Windows
                 FaceAPI.FaceAttributeType.Age,
                 FaceAPI.FaceAttributeType.Gender,
                 FaceAPI.FaceAttributeType.Emotion,
+                FaceAPI.FaceAttributeType.Hair
             
             };
 
@@ -138,9 +139,9 @@ namespace FacialRecognition_Oxford.Windows
                     StatisticsData.UpdateStatistics(face.FaceAttributes);
 
                     if (_statisticsWindow.IsLoaded) 
-                        _statisticsWindow.SetMaleFemmalePieChart(StatisticsData);
+                        _statisticsWindow.SetStatistics(StatisticsData);
 
-                    Helper.ConsoleLog(face.FaceId + " is new!" + _facesGuids.Count);
+                    Helper.ConsoleLog(face.FaceId + " is new! [" + _facesGuids.Count + "]");
                 }
                 
                 StatisticsData.UpdateHappiness(face.FaceAttributes.Emotion.Happiness); //todo ask what is intelligent (only first person)
