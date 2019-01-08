@@ -181,6 +181,7 @@ namespace FacialRecognition_Oxford.Windows
         private BitmapSource VisualizeResult(VideoFrame frame)
         {
             BitmapSource visImage = frame.Image.ToBitmapSource();
+            //todo test
             LiveCameraResult result = _latestResultsToDisplay;
 
             if (result != null)
