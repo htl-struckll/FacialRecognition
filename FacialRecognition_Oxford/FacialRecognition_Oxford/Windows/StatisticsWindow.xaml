@@ -6,7 +6,7 @@
         xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
         mc:Ignorable="d"
         Title="StatisticsWindow" Height="634.5" Width="1031">
-    <Grid Loaded="Window_Loaded">
+    <Grid Loaded="Window_Loaded">                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
         <ToolBar Margin="0,0,-0.4,0" Height="31" VerticalAlignment="Top">
             <Menu Width="51">
                 <MenuItem Click="Reset_Click" Background="AliceBlue"  Header="Reset" Height="26" Margin="0" Width="51"/>

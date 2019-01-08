@@ -28,7 +28,7 @@ namespace FacialRecognition_Oxford.Windows
 
         #region const
 
-        private const string SubscriptionKey = "eafef65edfe04fb5b70a3f9739cc1618";
+        private const string SubscriptionKey = "e785fa951218458694e7688da94eb273";
         private const string EnpointUri = "https://westeurope.api.cognitive.microsoft.com/face/v1.0";
 
         #endregion const
@@ -138,13 +138,13 @@ namespace FacialRecognition_Oxford.Windows
                     StatisticsData.UpdateStatistics(face.FaceAttributes);
 
                     if (_statisticsWindow.IsLoaded) 
-                        _statisticsWindow.SetStatistics(StatisticsData);
+                        _statisticsWindow.SetMaleFemmalePieChart(StatisticsData);
 
                     Helper.ConsoleLog(face.FaceId + " is new!" + _facesGuids.Count);
                 }
                 
                 StatisticsData.UpdateHappiness(face.FaceAttributes.Emotion.Happiness); //todo ask what is intelligent (only first person)
-                _statisticsWindow.SetHappiness(StatisticsData.Happiness);
+                _statisticsWindow.SetHappinessGauge(StatisticsData.Happiness);
             }
 
             return new LiveCameraResult {Faces = faces, EmotionScores = scores};

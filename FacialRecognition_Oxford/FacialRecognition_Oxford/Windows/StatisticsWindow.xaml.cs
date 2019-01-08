@@ -28,7 +28,8 @@ namespace FacialRecognition_Oxford.Windows
             DataContext = this;
         }
 
-        public void SetStatistics(StatisticsData data)
+
+        public void SetMaleFemmalePieChart(StatisticsData data)
         {
             Helper.ConsoleLog("Setting: " + data);
 
@@ -38,11 +39,9 @@ namespace FacialRecognition_Oxford.Windows
                 () => FemalePieSeries.Values = new ChartValues<int>() { data.AmountFemale });
         }
 
-        public void SetHappiness(double happiness)
-        {
-            HappinessGauge.Dispatcher.Invoke(
+        /// <summary> Sets the happiness gauge in realtime</summary>
+        public void SetHappinessGauge(double happiness) => HappinessGauge.Dispatcher.Invoke(
                 () => HappinessGauge.Value = happiness * 100);
-        }
 
         private void Window_Loaded(object sender, RoutedEventArgs e) => IsLoaded = true;
 
