@@ -124,7 +124,8 @@ namespace FacialRecognition_Oxford.Windows
                 FaceAPI.FaceAttributeType.Age,
                 FaceAPI.FaceAttributeType.Gender,
                 FaceAPI.FaceAttributeType.Emotion,
-                FaceAPI.FaceAttributeType.Hair
+                FaceAPI.FaceAttributeType.Hair,
+                FaceAPI.FaceAttributeType.Exposure
             
             };
 
@@ -133,6 +134,9 @@ namespace FacialRecognition_Oxford.Windows
 
             foreach (Face face in faces)
             {
+
+                Helper.ConsoleLog($"-\nDetected face: {face.FaceId} with Attributes:\n\tAge: {face.FaceAttributes.Age}\n\tGender: {face.FaceAttributes.Gender}\n\tDomintant Emotion: {Helper.GetDominantEmotionAsString(face.FaceAttributes.Emotion)}\n\tExpose: {face.FaceAttributes.Exposure.ExposureLevel}, with value of {face.FaceAttributes.Exposure.Value}\n");
+
                 if (!await CheckIfFaceWasSeenBefore(face.FaceId, FaceClient, _facesGuids))
                 {
                     _facesGuids.Add(face.FaceId);
@@ -144,7 +148,7 @@ namespace FacialRecognition_Oxford.Windows
                     Helper.ConsoleLog(face.FaceId + " is new! [" + _facesGuids.Count + "]");
                 }
                 
-                StatisticsData.UpdateHappiness(face.FaceAttributes.Emotion.Happiness); //todo ask what is intelligent (only first person)
+                StatisticsData.UpdateHappiness(face.FaceAttributes.Emotion.Happiness);
                 _statisticsWindow.SetHappinessGauge(StatisticsData.Happiness);
             }
 

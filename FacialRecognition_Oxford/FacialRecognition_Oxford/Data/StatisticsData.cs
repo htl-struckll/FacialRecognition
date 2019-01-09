@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using FacialRecognition_Oxford.Misc;
 using Microsoft.ProjectOxford.Face.Contract;
 
 namespace FacialRecognition_Oxford.Data

@@ -39,7 +39,7 @@ namespace FacialRecognition_Oxford.Misc
         /// </summary>
         /// <param name="msg"></param>
         public static void ConsoleLog(string msg) =>
-            Console.WriteLine(@"[" + DateTime.Now.ToShortTimeString() + @"] " + msg);
+            Console.WriteLine(@"[" + DateTime.Now.ToLongTimeString() + @"] " + msg);
 
         /// <summary>
         /// Window display function
