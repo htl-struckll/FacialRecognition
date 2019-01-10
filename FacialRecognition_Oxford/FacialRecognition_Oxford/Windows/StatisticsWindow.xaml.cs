@@ -13,6 +13,8 @@ using System.Collections.Generic;
 using LiveCharts.Configurations;
 using System.Threading;
 using System.Diagnostics;
+using System.Windows.Media;
+
 
 /*
 * Install-Package LiveCharts.Wpf
@@ -66,7 +68,7 @@ namespace FacialRecognition_Oxford.Windows
             PieChartGender.Margin = new Thickness(leftMargin, topMargin, width / 2, height / 2);
             HappinessGauge.Margin = new Thickness(width / 2, topMargin, rightMargin, height / 2);
             HairColourLineChart.Margin = new Thickness(leftMargin, height / 2, width / 2, bottomMargin);
-            RamChart.Margin = new Thickness(width/2, height/2,rightMargin,bottomMargin+5);
+            RamChart.Margin = new Thickness(width / 2, height / 2, rightMargin, bottomMargin + 5);
         }
         #endregion events
 
@@ -83,43 +85,55 @@ namespace FacialRecognition_Oxford.Windows
             RedValues = new ChartValues<double> { 0 };
             WhiteValues = new ChartValues<double> { 0 };
             OtherValues = new ChartValues<double> { 0 };
+            var converter = new System.Windows.Media.BrushConverter();
+
 
             SeriesCollection = new SeriesCollection
             {
+
                 new StackedAreaSeries
                 {
                     Title = "Blond",
-                     Values =  BlondValues
+                    Values =  BlondValues,
+                    Fill = (Brush)converter.ConvertFromString("#f5e077")
+
+
+        },
+                new StackedAreaSeries
+                {
+                     Title = "Brown",
+                     Values = BrownValues,
+                     Fill = (Brush)converter.ConvertFromString("#8B4513")
                 },
                 new StackedAreaSeries
                 {
-                    Title = "Brown",
-                     Values = BrownValues
+                     Title = "Black",
+                     Values = BlackValues,
+                     Fill = (Brush)converter.ConvertFromString("#000")
                 },
                 new StackedAreaSeries
                 {
-                    Title = "Black",
-                     Values = BlackValues
+                     Title = "Gray",
+                     Values = GrayValues,
+                     Fill = (Brush)converter.ConvertFromString("#d3d3d3")
                 },
                 new StackedAreaSeries
                 {
-                    Title = "Gray",
-                     Values = GrayValues
+                     Title = "Red",
+                     Values = RedValues,
+                     Fill = (Brush)converter.ConvertFromString("#ff0000")
                 },
                 new StackedAreaSeries
                 {
-                    Title = "Red",
-                     Values = RedValues
+                     Title = "White",
+                     Values = WhiteValues,
+                     Fill = (Brush)converter.ConvertFromString("#F5F5DC")
                 },
                 new StackedAreaSeries
                 {
-                    Title = "White",
-                     Values = WhiteValues
-                },
-                new StackedAreaSeries
-                {
-                    Title = "Other",
-                     Values = OtherValues
+                     Title = "Other",
+                     Values = OtherValues,
+                     Fill = (Brush)converter.ConvertFromString("#800080")
                 }
             };
 
@@ -135,7 +149,7 @@ namespace FacialRecognition_Oxford.Windows
             while (true)
             {
                 PerformanceCounter pCounter = new PerformanceCounter("Memory", "Committed Bytes");
-                double ramMem = pCounter.RawValue / 10000;
+                double ramMem = pCounter.RawValue ;
 
                 RamValues.Add(ramMem);
                 Thread.Sleep(100);
@@ -184,9 +198,9 @@ namespace FacialRecognition_Oxford.Windows
                     BrownValues.Remove(BrownValues.Count);
                     brownCnt++;
                     BrownValues.Add(brownCnt);
-           
 
-                   
+
+
                     BlondValues.Remove(BlondValues.Count);
                     BlondValues.Add(blondCnt);
                     BlackValues.Remove(BlackValues.Count);

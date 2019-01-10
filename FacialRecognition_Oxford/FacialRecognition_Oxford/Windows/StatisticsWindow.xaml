@@ -62,7 +62,7 @@
                 </lvc:Axis>
             </lvc:CartesianChart.AxisX>
             <lvc:CartesianChart.AxisY>
-                <lvc:Axis IsMerged="True" Title="Megabyte" Foreground="Black"  MaxValue="800000" MinValue="0">
+                <lvc:Axis IsMerged="True" Title="Megabyte" Foreground="Black"  MaxValue="8000000000" MinValue="0">
                     <lvc:Axis.Separator>
                         <lvc:Separator StrokeThickness="1.5" StrokeDashArray="4">
                             <lvc:Separator.Stroke>
