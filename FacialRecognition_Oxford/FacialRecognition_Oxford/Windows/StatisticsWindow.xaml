@@ -37,10 +37,40 @@
 
         <lvc:CartesianChart x:Name="HairColourLineChart" BorderThickness="1px"  BorderBrush="Black" Series="{Binding SeriesCollection}"  LegendLocation="Right" Margin="0,36,10,0" Grid.Column="1">
             <lvc:CartesianChart.AxisX>
-                <lvc:Axis Title="Recognized People" MinRange="0" MaxRange="10"  Foreground="Black"></lvc:Axis>
+                <lvc:Axis Title="Recognized People"  Foreground="Black"></lvc:Axis>
             </lvc:CartesianChart.AxisX>
             <lvc:CartesianChart.AxisY>
-                <lvc:Axis Title="Amount" MinRange="0" MaxRange="10" Foreground="Black"></lvc:Axis>
+                <lvc:Axis x:Name="yaxe" Title="Amount" Foreground="Black"></lvc:Axis>
+            </lvc:CartesianChart.AxisY>
+        </lvc:CartesianChart>
+
+        <lvc:CartesianChart x:Name="RamChart" BorderBrush="Black" BorderThickness="1px" Background="White" Margin="0,48,0,0">
+            <lvc:CartesianChart.Series>
+                <lvc:LineSeries Values="{Binding RamValues}" Title="Seconds" Foreground="Black" StrokeThickness="2" 
+                       Stroke="#1C8FC5" Fill="#1C8FC5" LineSmoothness="1" 
+                       PointGeometrySize="0"/>
+            </lvc:CartesianChart.Series>
+            <lvc:CartesianChart.AxisX>
+                <lvc:Axis IsMerged="True">
+                    <lvc:Axis.Separator>
+                        <lvc:Separator StrokeThickness="1" StrokeDashArray="4">
+                            <lvc:Separator.Stroke>
+                                <SolidColorBrush Color="#404F56" />
+                            </lvc:Separator.Stroke>
+                        </lvc:Separator>
+                    </lvc:Axis.Separator>
+                </lvc:Axis>
+            </lvc:CartesianChart.AxisX>
+            <lvc:CartesianChart.AxisY>
+                <lvc:Axis IsMerged="True" Title="Megabyte" Foreground="Black"  MaxValue="800000" MinValue="0">
+                    <lvc:Axis.Separator>
+                        <lvc:Separator StrokeThickness="1.5" StrokeDashArray="4">
+                            <lvc:Separator.Stroke>
+                                <SolidColorBrush Color="#404F56" />
+                            </lvc:Separator.Stroke>
+                        </lvc:Separator>
+                    </lvc:Axis.Separator>
+                </lvc:Axis>
             </lvc:CartesianChart.AxisY>
         </lvc:CartesianChart>
     </Grid>

@@ -27,9 +27,8 @@ namespace FacialRecognition_Oxford.Misc
             List<string> retVal = new List<string>();
 
             if(attributes.Gender != null)
-                retVal.Add(attributes.Gender);
-            if(attributes.Age > 0)
-                retVal.Add("Glasses: " + attributes.Glasses);
+                retVal.Add("Gender: " + attributes.Gender);
+            
 
             return string.Join(", ", retVal);
         }
@@ -40,6 +39,8 @@ namespace FacialRecognition_Oxford.Misc
         /// <param name="msg"></param>
         public static void ConsoleLog(string msg) =>
             Console.WriteLine(@"[" + DateTime.Now.ToLongTimeString() + @"] " + msg);
+
+        public static void SetColour() => Console.BackgroundColor = ConsoleColor.Blue;
 
         /// <summary>
         /// Window display function

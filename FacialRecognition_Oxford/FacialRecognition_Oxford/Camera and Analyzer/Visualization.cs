@@ -44,12 +44,7 @@ namespace FacialRecognition_Oxford.VideoFrameAnalyzer
                         face.FaceRectangle.Width, face.FaceRectangle.Height);
                     string text = string.Empty;
 
-                    if (face.FaceAttributes != null)
-                        text += Helper.GetFaceAttributesAsString(face.FaceAttributes);
-                    if (emotionScores?[i] != null)
-                        text += ", " + Helper.GetDominantEmotionAsString(emotionScores[i]);
-
-                    text += face.FaceAttributes.Age;
+                    text += Helper.GetFaceAttributesAsString(face.FaceAttributes);
 
                     faceRect.Inflate(6 * annotationScale, 6 * annotationScale);
 
